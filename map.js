@@ -609,7 +609,7 @@ function sosGetCaps(node,cb) {
   }
 
   OpenLayers.Request.issue({
-     url      : 'get.php?u=' + encodeURIComponent(node.attributes.url)
+     url      : 'proxy.php?url=' + encodeURIComponent(node.attributes.url)
     ,callback : function(r) {
       var sos = new SOSCapabilities(new OpenLayers.Format.XML().read(r.responseText));
       if (sos.type === 'EXCEPTION') {
