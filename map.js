@@ -133,7 +133,7 @@ function init() {
         ,items    : new Ext.grid.GridPanel({
            id               : 'queryGridPanel'
           ,store            : new Ext.data.JsonStore({
-             proxy     : new Ext.data.HttpProxy({url : 'proxy.php',timeout : 120000})
+             proxy     : new Ext.data.HttpProxy({url : 'get.php',timeout : 120000})
             ,fields    : ['id','title','geometry','summary','links']
             ,root      : 'records'
             ,listeners : {
@@ -609,7 +609,7 @@ function sosGetCaps(node,cb) {
   }
 
   OpenLayers.Request.issue({
-     url      : 'proxy.php?url=' + encodeURIComponent(node.attributes.url)
+     url      : 'get.php?url=' + encodeURIComponent(node.attributes.url)
     ,callback : function(r) {
       var sos = new SOSCapabilities(new OpenLayers.Format.XML().read(r.responseText));
       if (sos.type === 'EXCEPTION') {
