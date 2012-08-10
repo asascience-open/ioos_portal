@@ -86,7 +86,7 @@ function init() {
             ,pressed      : true
             ,handler      : function() {
               var sto = Ext.getCmp('queryGridPanel').getStore();
-              sto.setBaseParam('url','http://www.ngdc.noaa.gov/geoportal/rest/find/document?rid=local&ridName=NOAA%27s%20Geophysical%20Data%20Center&rids=local&searchText=sos.resource.url:*%20AND%20sys.siteuuid%3A%22{E4949969-468A-4B10-823D-9BF1BF0785B2}%22&start=1&max=1000&orderBy=relevance&maxSearchTimeMilliSec=10000&f=pjson');
+              sto.setBaseParam('xmlData','<?xml version="1.0"?><csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" version="2.0.2" service="CSW" resultType="results" outputSchema="http://www.isotc211.org/2005/gmd" startPosition="1" maxRecords="1000"> <csw:Query typeNames="csw:Record" xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml"> <csw:ElementSetName>full</csw:ElementSetName> <csw:Constraint version="1.1.0"> <ogc:Filter> <ogc:And> <ogc:PropertyIsEqualTo> <ogc:PropertyName>sys.siteuuid</ogc:PropertyName> <ogc:Literal>{E4949969-468A-4B10-823D-9BF1BF0785B2}</ogc:Literal> </ogc:PropertyIsEqualTo> <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?"> <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName> <ogc:Literal>*sos*</ogc:Literal> </ogc:PropertyIsLike> </ogc:And> </ogc:Filter></csw:Constraint></csw:Query></csw:GetRecords>');
               sto.load();
             }
           })
@@ -134,9 +134,8 @@ function init() {
            id               : 'queryGridPanel'
           ,store            : new Ext.data.XmlStore({
             proxy       : new Ext.data.HttpProxy({
-               method  : 'POST'
-              ,url     : 'post.php?ns=gmi|srv|gmd|gco&url=' + encodeURIComponent('http://www.ngdc.noaa.gov/geoportal/csw')
-              ,xmlData : '<?xml version="1.0"?><csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" version="2.0.2" service="CSW" resultType="results" outputSchema="http://www.isotc211.org/2005/gmd" startPosition="1" maxRecords="1000"> <csw:Query typeNames="csw:Record" xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml"> <csw:ElementSetName>full</csw:ElementSetName> <csw:Constraint version="1.1.0"> <ogc:Filter> <ogc:And> <ogc:PropertyIsEqualTo> <ogc:PropertyName>sys.siteuuid</ogc:PropertyName> <ogc:Literal>{E4949969-468A-4B10-823D-9BF1BF0785B2}</ogc:Literal> </ogc:PropertyIsEqualTo> <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?"> <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName> <ogc:Literal>*sos*</ogc:Literal> </ogc:PropertyIsLike> </ogc:And> </ogc:Filter></csw:Constraint></csw:Query></csw:GetRecords>'
+               method : 'POST'
+              ,url    : 'post.php?ns=gmi|srv|gmd|gco&url=' + encodeURIComponent('http://www.ngdc.noaa.gov/geoportal/csw')
             })
             ,autoLoad   : true
             ,record     : 'gmi_MI_Metadata'
@@ -365,7 +364,7 @@ function init() {
   });
 
   var sto = Ext.getCmp('queryGridPanel').getStore();
-  // sto.setBaseParam('url','http://www.ngdc.noaa.gov/geoportal/rest/find/document?rid=local&ridName=NOAA%27s%20Geophysical%20Data%20Center&rids=local&searchText=sos.resource.url:*%20AND%20sys.siteuuid%3A%22{E4949969-468A-4B10-823D-9BF1BF0785B2}%22&start=1&max=1000&orderBy=relevance&maxSearchTimeMilliSec=10000&f=pjson');
+  sto.setBaseParam('xmlData','<?xml version="1.0"?><csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" version="2.0.2" service="CSW" resultType="results" outputSchema="http://www.isotc211.org/2005/gmd" startPosition="1" maxRecords="1000"> <csw:Query typeNames="csw:Record" xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml"> <csw:ElementSetName>full</csw:ElementSetName> <csw:Constraint version="1.1.0"> <ogc:Filter> <ogc:And> <ogc:PropertyIsEqualTo> <ogc:PropertyName>sys.siteuuid</ogc:PropertyName> <ogc:Literal>{E4949969-468A-4B10-823D-9BF1BF0785B2}</ogc:Literal> </ogc:PropertyIsEqualTo> <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?"> <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName> <ogc:Literal>*sos*</ogc:Literal> </ogc:PropertyIsLike> </ogc:And> </ogc:Filter></csw:Constraint></csw:Query></csw:GetRecords>');
   sto.load();
 }
 
