@@ -276,8 +276,9 @@ function init() {
                   }
                   keywords.sort();
                   children.push({
-                     text : services[i].data.type + (keywords.length > 0 ? ' <font color=gray>(' + keywords.join(', ') + ')</font>' : '')
+                     text : services[i].data.type
                     ,url  : services[i].data.url
+                    ,qtip : services[i].data.type + (keywords.length > 0 ? ' keywords: ' + keywords.join(', ') : '')
                     ,leaf : false
                     ,gpId : rec.id
                   });
@@ -291,6 +292,7 @@ function init() {
                   ,root        : new Ext.tree.AsyncTreeNode({children : [{
                      text      : 'Services'
                     ,children  : children
+                    ,qtip      : 'Expand to view available data services'
                   }]})
                   ,bodyStyle   : 'background-color:transparent'
                   ,loader      : new Ext.tree.TreeLoader({
