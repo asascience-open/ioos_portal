@@ -132,11 +132,27 @@ function init() {
         }
         ,items    : new Ext.grid.GridPanel({
            id               : 'queryGridPanel'
-          ,store            : new Ext.data.JsonStore({
-             proxy     : new Ext.data.HttpProxy({url : 'get.php',timeout : 120000})
-            ,fields    : ['id','title','geometry','summary','links']
-            ,root      : 'records'
-            ,listeners : {
+          ,store            : new Ext.data.XmlStore({
+            proxy       : new Ext.data.HttpProxy({
+               method  : 'POST'
+              ,url     : 'post.php?ns=gmi|srv|gmd|gco&url=' + encodeURIComponent('http://www.ngdc.noaa.gov/geoportal/csw')
+              ,xmlData : '<?xml version="1.0"?><csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" version="2.0.2" service="CSW" resultType="results" outputSchema="http://www.isotc211.org/2005/gmd" startPosition="1" maxRecords="1000"> <csw:Query typeNames="csw:Record" xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml"> <csw:ElementSetName>full</csw:ElementSetName> <csw:Constraint version="1.1.0"> <ogc:Filter> <ogc:And> <ogc:PropertyIsEqualTo> <ogc:PropertyName>sys.siteuuid</ogc:PropertyName> <ogc:Literal>{E4949969-468A-4B10-823D-9BF1BF0785B2}</ogc:Literal> </ogc:PropertyIsEqualTo> <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?"> <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName> <ogc:Literal>*sos*</ogc:Literal> </ogc:PropertyIsLike> </ogc:And> </ogc:Filter></csw:Constraint></csw:Query></csw:GetRecords>'
+            })
+            ,autoLoad   : true
+            ,record     : 'gmi_MI_Metadata'
+            ,fields     : [
+               {name : 'id'             ,mapping : 'gmd_identificationInfo gmd_MD_DataIdentification[id=DataIdentification] > gmd_citation > gmd_CI_Citation > gmd_title > gco_CharacterString'}
+              ,{name : 'title'          ,mapping : 'gmd_identificationInfo gmd_MD_DataIdentification[id=DataIdentification] > gmd_citation > gmd_CI_Citation > gmd_title > gco_CharacterString'}
+              ,{name : 'summary'        ,mapping : 'gmd_identificationInfo gmd_MD_DataIdentification[id=DataIdentification] > gmd_abstract > gco_CharacterString'}
+              ,{name : 'bboxWest'       ,mapping : 'gmd_identificationInfo gmd_MD_DataIdentification[id=DataIdentification] > gmd_extent > gmd_EX_Extent > gmd_geographicElement > gmd_EX_GeographicBoundingBox > gmd_westBoundLongitude > gco_Decimal'}
+              ,{name : 'bboxEast'       ,mapping : 'gmd_identificationInfo gmd_MD_DataIdentification[id=DataIdentification] > gmd_extent > gmd_EX_Extent > gmd_geographicElement > gmd_EX_GeographicBoundingBox > gmd_eastBoundLongitude > gco_Decimal'}
+              ,{name : 'bboxSouth'      ,mapping : 'gmd_identificationInfo gmd_MD_DataIdentification[id=DataIdentification] > gmd_extent > gmd_EX_Extent > gmd_geographicElement > gmd_EX_GeographicBoundingBox > gmd_southBoundLatitude > gco_Decimal'}
+              ,{name : 'bboxNorth'      ,mapping : 'gmd_identificationInfo gmd_MD_DataIdentification[id=DataIdentification] > gmd_extent > gmd_EX_Extent > gmd_geographicElement > gmd_EX_GeographicBoundingBox > gmd_northBoundLatitude > gco_Decimal'}
+              ,{name : 'serviceCitation',mapping : 'gmd_identificationInfo srv_SV_ServiceIdentification > gmd_citation > gmd_CI_Citation > gmd_title > gco_CharacterString'}
+              ,{name : 'serviceType'    ,mapping : 'gmd_identificationInfo srv_SV_ServiceIdentification > srv_serviceType > gco_LocalName'}
+              ,{name : 'serviceUrl'     ,mapping : 'gmd_identificationInfo srv_SV_ServiceIdentification > srv_containsOperations > srv_SV_OperationMetadata > srv_connectPoint > gmd_CI_OnlineResource > gmd_linkage > gmd_URL'}
+            ]
+            ,listeners  : {
               beforeload : function(sto) {
                 var lyr = map.getLayersByName('queryHits')[0];
                 if (lyr && lyr.features) {
@@ -150,12 +166,22 @@ function init() {
               ,load      : function(sto) {
                 var features = [];
                 sto.each(function(rec) {
+                  var g = {
+                     type        : 'Polygon'
+                    ,coordinates : [[
+                       [rec.get('bboxWest'),rec.get('bboxSouth')]
+                      ,[rec.get('bboxEast'),rec.get('bboxSouth')]
+                      ,[rec.get('bboxEast'),rec.get('bboxNorth')]
+                      ,[rec.get('bboxWest'),rec.get('bboxNorth')]
+                      ,[rec.get('bboxWest'),rec.get('bboxSouth')]
+                    ]]
+                  };
                   var geojson = new OpenLayers.Format.GeoJSON();
                   var f       = geojson.read({
                      type     : 'FeatureCollection'
                     ,features : [{
                        type       : 'Feature'
-                      ,geometry   : rec.get('geometry')
+                      ,geometry   : g
                       ,properties : {
                          title   : rec.get('title')
                         ,summary : rec.get('summary')
@@ -223,12 +249,12 @@ function init() {
                   ,target : rec.get('id') + 'toolTip'
                 });
                 var children = [];
-                var links    = rec.get('links');
+                var links    = [rec.get('serviceUrl')]; // rec.get('links');
                 for (var i = 0; i < links.length; i++) {
                   children.push({
-                     text : links[i].type
-                    ,url  : links[i].href
-                    ,leaf : !new RegExp(/service=sos/i).test(links[i].href)
+                     text : 'SOS' // links[i].type
+                    ,url  : links[i] // links[i].href
+                    ,leaf : false // !new RegExp(/service=sos/i).test(links[i].href)
                     ,gpId : rec.get('id')
                   });
                 }
@@ -313,7 +339,7 @@ function init() {
   });
 
   var sto = Ext.getCmp('queryGridPanel').getStore();
-  sto.setBaseParam('url','http://www.ngdc.noaa.gov/geoportal/rest/find/document?rid=local&ridName=NOAA%27s%20Geophysical%20Data%20Center&rids=local&searchText=sos.resource.url:*%20AND%20sys.siteuuid%3A%22{E4949969-468A-4B10-823D-9BF1BF0785B2}%22&start=1&max=1000&orderBy=relevance&maxSearchTimeMilliSec=10000&f=pjson');
+  // sto.setBaseParam('url','http://www.ngdc.noaa.gov/geoportal/rest/find/document?rid=local&ridName=NOAA%27s%20Geophysical%20Data%20Center&rids=local&searchText=sos.resource.url:*%20AND%20sys.siteuuid%3A%22{E4949969-468A-4B10-823D-9BF1BF0785B2}%22&start=1&max=1000&orderBy=relevance&maxSearchTimeMilliSec=10000&f=pjson');
   sto.load();
 }
 
