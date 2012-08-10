@@ -150,11 +150,20 @@ function init() {
               ,{name : 'services'       ,convert : (function(){
                 return function(v,n) {
                   return new Ext.data.XmlReader({
-                     record : '> gmd_identificationInfo > srv_SV_ServiceIdentification'
+                     record : 'gmd_identificationInfo > srv_SV_ServiceIdentification'
                     ,fields : [
-                       {name : 'citation',mapping : 'gmd_citation > gmd_CI_Citation > gmd_title > gco_CharacterString'}
-                      ,{name : 'type'    ,mapping : 'srv_serviceType > gco_LocalName'}
+                       {name : 'type'    ,mapping : 'srv_serviceType > gco_LocalName'}
                       ,{name : 'url'     ,mapping : 'srv_containsOperations > srv_SV_OperationMetadata > srv_connectPoint > gmd_CI_OnlineResource > gmd_linkage > gmd_URL'}
+                      ,{name : 'keywords',convert : (function(){
+                        return function(v,n) {
+                          return new Ext.data.XmlReader({
+                             record : 'srv_keywords > gmd_MD_Keywords > gmd_keyword'
+                            ,fields : [
+                              {name : 'keyword',mapping : 'gco_CharacterString'}
+                            ]
+                          }).readRecords(n).records;
+                        }
+                      })()}
                     ]
                   }).readRecords(n).records;
                 }
@@ -259,8 +268,15 @@ function init() {
                 var children = [];
                 var services = rec.get('services');
                 for (var i = 0; i < services.length; i++) {
+                  var keywords = [];
+                  for (var j = 0; j < services[i].data.keywords.length; j++) {
+                    if (services[i].data.keywords[j].data.keyword != '') {
+                      keywords.push(services[i].data.keywords[j].data.keyword);
+                    }
+                  }
+                  keywords.sort();
                   children.push({
-                     text : services[i].data.type
+                     text : services[i].data.type + (keywords.length > 0 ? ' <font color=gray>(' + keywords.join(', ') + ')</font>' : '')
                     ,url  : services[i].data.url
                     ,leaf : false
                     ,gpId : rec.id
