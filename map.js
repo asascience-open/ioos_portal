@@ -143,7 +143,6 @@ function init() {
                method : 'POST'
               ,url    : 'post.php?ns=gmi|srv|gmd|gco&url=' + encodeURIComponent('http://www.ngdc.noaa.gov/geoportal/csw')
             })
-            ,autoLoad   : true
             ,record     : 'gmi_MI_Metadata'
             ,fields     : [
                {name : 'title'          ,mapping : 'gmd_identificationInfo > gmd_MD_DataIdentification[id=DataIdentification] > gmd_citation > gmd_CI_Citation > gmd_title > gco_CharacterString'}
