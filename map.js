@@ -719,6 +719,7 @@ function wmsGetCaps(node,cb) {
     return;
   }
   knownGetCaps[node.attributes.url] = true;
+
   OpenLayers.Request.issue({
      url      : 'get.php?url=' + encodeURIComponent(node.attributes.url)
     ,callback : function(r) {
