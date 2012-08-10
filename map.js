@@ -141,16 +141,25 @@ function init() {
             ,autoLoad   : true
             ,record     : 'gmi_MI_Metadata'
             ,fields     : [
-               {name : 'id'             ,mapping : 'gmd_identificationInfo gmd_MD_DataIdentification[id=DataIdentification] > gmd_citation > gmd_CI_Citation > gmd_title > gco_CharacterString'}
-              ,{name : 'title'          ,mapping : 'gmd_identificationInfo gmd_MD_DataIdentification[id=DataIdentification] > gmd_citation > gmd_CI_Citation > gmd_title > gco_CharacterString'}
-              ,{name : 'summary'        ,mapping : 'gmd_identificationInfo gmd_MD_DataIdentification[id=DataIdentification] > gmd_abstract > gco_CharacterString'}
-              ,{name : 'bboxWest'       ,mapping : 'gmd_identificationInfo gmd_MD_DataIdentification[id=DataIdentification] > gmd_extent > gmd_EX_Extent > gmd_geographicElement > gmd_EX_GeographicBoundingBox > gmd_westBoundLongitude > gco_Decimal'}
-              ,{name : 'bboxEast'       ,mapping : 'gmd_identificationInfo gmd_MD_DataIdentification[id=DataIdentification] > gmd_extent > gmd_EX_Extent > gmd_geographicElement > gmd_EX_GeographicBoundingBox > gmd_eastBoundLongitude > gco_Decimal'}
-              ,{name : 'bboxSouth'      ,mapping : 'gmd_identificationInfo gmd_MD_DataIdentification[id=DataIdentification] > gmd_extent > gmd_EX_Extent > gmd_geographicElement > gmd_EX_GeographicBoundingBox > gmd_southBoundLatitude > gco_Decimal'}
-              ,{name : 'bboxNorth'      ,mapping : 'gmd_identificationInfo gmd_MD_DataIdentification[id=DataIdentification] > gmd_extent > gmd_EX_Extent > gmd_geographicElement > gmd_EX_GeographicBoundingBox > gmd_northBoundLatitude > gco_Decimal'}
-              ,{name : 'serviceCitation',mapping : 'gmd_identificationInfo srv_SV_ServiceIdentification > gmd_citation > gmd_CI_Citation > gmd_title > gco_CharacterString'}
-              ,{name : 'serviceType'    ,mapping : 'gmd_identificationInfo srv_SV_ServiceIdentification > srv_serviceType > gco_LocalName'}
-              ,{name : 'serviceUrl'     ,mapping : 'gmd_identificationInfo srv_SV_ServiceIdentification > srv_containsOperations > srv_SV_OperationMetadata > srv_connectPoint > gmd_CI_OnlineResource > gmd_linkage > gmd_URL'}
+               {name : 'id'             ,mapping : 'gmd_identificationInfo > gmd_MD_DataIdentification[id=DataIdentification] > gmd_citation > gmd_CI_Citation > gmd_title > gco_CharacterString'}
+              ,{name : 'title'          ,mapping : 'gmd_identificationInfo > gmd_MD_DataIdentification[id=DataIdentification] > gmd_citation > gmd_CI_Citation > gmd_title > gco_CharacterString'}
+              ,{name : 'summary'        ,mapping : 'gmd_identificationInfo > gmd_MD_DataIdentification[id=DataIdentification] > gmd_abstract > gco_CharacterString'}
+              ,{name : 'bboxWest'       ,mapping : 'gmd_identificationInfo > gmd_MD_DataIdentification[id=DataIdentification] > gmd_extent > gmd_EX_Extent > gmd_geographicElement > gmd_EX_GeographicBoundingBox > gmd_westBoundLongitude > gco_Decimal'}
+              ,{name : 'bboxEast'       ,mapping : 'gmd_identificationInfo > gmd_MD_DataIdentification[id=DataIdentification] > gmd_extent > gmd_EX_Extent > gmd_geographicElement > gmd_EX_GeographicBoundingBox > gmd_eastBoundLongitude > gco_Decimal'}
+              ,{name : 'bboxSouth'      ,mapping : 'gmd_identificationInfo > gmd_MD_DataIdentification[id=DataIdentification] > gmd_extent > gmd_EX_Extent > gmd_geographicElement > gmd_EX_GeographicBoundingBox > gmd_southBoundLatitude > gco_Decimal'}
+              ,{name : 'bboxNorth'      ,mapping : 'gmd_identificationInfo > gmd_MD_DataIdentification[id=DataIdentification] > gmd_extent > gmd_EX_Extent > gmd_geographicElement > gmd_EX_GeographicBoundingBox > gmd_northBoundLatitude > gco_Decimal'}
+              ,{name : 'services'       ,convert : (function(){
+                return function(v,n) {
+                  return new Ext.data.XmlReader({
+                     record : '> gmd_identificationInfo > srv_SV_ServiceIdentification'
+                    ,fields : [
+                       {name : 'citation',mapping : 'gmd_citation > gmd_CI_Citation > gmd_title > gco_CharacterString'}
+                      ,{name : 'type'    ,mapping : 'srv_serviceType > gco_LocalName'}
+                      ,{name : 'url'     ,mapping : 'srv_containsOperations > srv_SV_OperationMetadata > srv_connectPoint > gmd_CI_OnlineResource > gmd_linkage > gmd_URL'}
+                    ]
+                  }).readRecords(n).records;
+                }
+              })()}
             ]
             ,listeners  : {
               beforeload : function(sto) {
@@ -249,12 +258,12 @@ function init() {
                   ,target : rec.get('id') + 'toolTip'
                 });
                 var children = [];
-                var links    = [rec.get('serviceUrl')]; // rec.get('links');
-                for (var i = 0; i < links.length; i++) {
+                var services = rec.get('services');
+                for (var i = 0; i < services.length; i++) {
                   children.push({
-                     text : 'SOS' // links[i].type
-                    ,url  : links[i] // links[i].href
-                    ,leaf : false // !new RegExp(/service=sos/i).test(links[i].href)
+                     text : services[i].data.type
+                    ,url  : services[i].data.url
+                    ,leaf : false
                     ,gpId : rec.get('id')
                   });
                 }
