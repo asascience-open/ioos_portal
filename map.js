@@ -141,8 +141,7 @@ function init() {
             ,autoLoad   : true
             ,record     : 'gmi_MI_Metadata'
             ,fields     : [
-               {name : 'id'             ,mapping : 'gmd_identificationInfo > gmd_MD_DataIdentification[id=DataIdentification] > gmd_citation > gmd_CI_Citation > gmd_title > gco_CharacterString'}
-              ,{name : 'title'          ,mapping : 'gmd_identificationInfo > gmd_MD_DataIdentification[id=DataIdentification] > gmd_citation > gmd_CI_Citation > gmd_title > gco_CharacterString'}
+               {name : 'title'          ,mapping : 'gmd_identificationInfo > gmd_MD_DataIdentification[id=DataIdentification] > gmd_citation > gmd_CI_Citation > gmd_title > gco_CharacterString'}
               ,{name : 'summary'        ,mapping : 'gmd_identificationInfo > gmd_MD_DataIdentification[id=DataIdentification] > gmd_abstract > gco_CharacterString'}
               ,{name : 'bboxWest'       ,mapping : 'gmd_identificationInfo > gmd_MD_DataIdentification[id=DataIdentification] > gmd_extent > gmd_EX_Extent > gmd_geographicElement > gmd_EX_GeographicBoundingBox > gmd_westBoundLongitude > gco_Decimal'}
               ,{name : 'bboxEast'       ,mapping : 'gmd_identificationInfo > gmd_MD_DataIdentification[id=DataIdentification] > gmd_extent > gmd_EX_Extent > gmd_geographicElement > gmd_EX_GeographicBoundingBox > gmd_eastBoundLongitude > gco_Decimal'}
@@ -194,7 +193,7 @@ function init() {
                       ,properties : {
                          title   : rec.get('title')
                         ,summary : rec.get('summary')
-                        ,id      : rec.get('id')
+                        ,id      : rec.id
                       }
                     }]
                   });
@@ -219,7 +218,7 @@ function init() {
           })
           ,columns          : [
             {renderer : function(val,metadata,rec) {
-              return '<p id="' + rec.get('id') + 'toolTip" class="title"><b><a href="javascript:var foo = findAndZoomToFeatureById(\'' + rec.get('id') + '\')"><img style="margin-bottom:-1px" src="img/zoom.png">' + rec.get('title') + '</a></b></p>' + '<div id="' + rec.get('id') + '"></div>';
+              return '<p id="' + rec.id + 'toolTip" class="title"><b><a href="javascript:var foo = findAndZoomToFeatureById(\'' + rec.id + '\')"><img style="margin-bottom:-1px" src="img/zoom.png">' + rec.get('title') + '</a></b></p>' + '<div id="' + rec.id + '"></div>';
             }}
           ]
           ,viewConfig       : {
@@ -239,7 +238,7 @@ function init() {
                 var lyr = map.getLayersByName('queryHits')[0];
                 var rec = this.grid.getStore().getAt(row);
                 for (var i = 0; i < lyr.features.length; i++) {
-                  if (lyr.features[i].attributes.id == rec.get('id')) {
+                  if (lyr.features[i].attributes.id == rec.id) {
                     highlightControl.highlight(lyr.features[i]);
                   }
                   else {
@@ -255,7 +254,7 @@ function init() {
               sto.each(function(rec) {
                 new Ext.ToolTip({
                    html   : 'Zoom to ' + rec.get('title')
-                  ,target : rec.get('id') + 'toolTip'
+                  ,target : rec.id + 'toolTip'
                 });
                 var children = [];
                 var services = rec.get('services');
@@ -264,12 +263,12 @@ function init() {
                      text : services[i].data.type
                     ,url  : services[i].data.url
                     ,leaf : false
-                    ,gpId : rec.get('id')
+                    ,gpId : rec.id
                   });
                 }
                 var tp = new Ext.tree.TreePanel({
-                   renderTo    : rec.get('id')
-                  ,id          : rec.get('id') + 'treePanel'
+                   renderTo    : rec.id
+                  ,id          : rec.id + 'treePanel'
                   ,width       : Ext.getCmp('queryGridPanel').getWidth() - 35
                   ,border      : false
                   ,rootVisible : false
@@ -334,12 +333,12 @@ function init() {
           ,sm               : new Ext.grid.RowSelectionModel({
              singleSelect : true
             ,listeners    : {rowselect : function(sm,idx,rec) {
-              findAndZoomToFeatureById(rec.get('id'));
+              findAndZoomToFeatureById(rec.id);
             }}
           })
           ,listeners : {resize : function(gp,w,h) {
             gp.getStore().each(function(rec) {
-              Ext.getCmp(rec.get('id') + 'treePanel').setWidth(w - 35);
+              Ext.getCmp(rec.id + 'treePanel').setWidth(w - 35);
             });
           }}
         })
@@ -478,10 +477,11 @@ function initMap() {
       var sto = gp.getStore();
       var recs = [];
       for (var i = 0; i < e.features.length; i++) {
-        var idx = sto.find('id',e.features[i].attributes.id);
-        if (idx >= 0) {
-          recs.push(sto.getAt(idx));
-        }
+        sto.each(function(rec) {
+          if (rec.id == e.features[i].attributes.id) {
+            recs.push(rec);
+          }
+        });
       }
       sto.remove(recs);
     }
@@ -491,12 +491,12 @@ function initMap() {
     if (gp) {
       var sto = gp.getStore();
       for (var i = 0; i < e.features.length; i++) {
-        var idx = sto.find('id',e.features[i].attributes.id);
-        if (idx >= 0) {
-          var rec = sto.getAt(idx);
-          rec.set('hidden',e.features[i].attributes.hidden);
-          rec.commit();
-        }
+        sto.each(function(rec) {
+          if (rec.id == e.features[i].attributes.id) {
+            rec.set('hidden',e.features[i].attributes.hidden);
+            rec.commit();
+          } 
+        });
       }
     }
   });
@@ -687,16 +687,19 @@ function getProperties(attr) {
 function goQueryGridPanelRowById(gpId,focus) {
   var gp  = Ext.getCmp('queryGridPanel');
   var sto = gp.getStore();
-  var idx = sto.find('id',gpId);
-  if (idx >= 0) {
-    var sm = gp.getSelectionModel();
-    sm.suspendEvents();
-    sm.selectRow(idx);
-    sm.resumeEvents();
-    if (focus) {
-      gp.getView().focusRow(idx);
+  var idx = 0;
+  sto.each(function(rec) {
+    if (rec.id == gpId) {
+      var sm = gp.getSelectionModel();
+      sm.suspendEvents();
+      sm.selectRow(idx);
+      sm.resumeEvents();
+      if (focus) {
+        gp.getView().focusRow(idx);
+      }
     }
-  }
+    idx++;
+  });
 }
 
 function findAndZoomToFeatureById(id) {
