@@ -724,6 +724,11 @@ function wmsGetCaps(node,cb) {
      url      : 'get.php?url=' + encodeURIComponent(node.attributes.url)
     ,callback : function(r) {
       var caps = new OpenLayers.Format.WMSCapabilities().read(r.responseText);
+      if (!caps || !caps.capability) {
+        Ext.Msg.alert('WMS exception','There was an error querying this data service.');
+        cb([],{status : true});
+        return;
+      }
       var nodesByText = {};
       var nodesText   = [];
       for (var i = 0; i < caps.capability.layers.length; i++) {
