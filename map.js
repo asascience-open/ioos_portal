@@ -48,7 +48,7 @@ function init() {
         ,items     : [
           {
              columnWidth : 1
-            ,html        : '<table width="100%"><tr><td style="padding-bottom:4px;font:12px/13px tahoma,helvetica,sans-serif;color:gray" align=center>Click on one of these super sexy buttons to fire a REST query.</td></tr></table>'
+            ,html        : '<table width="100%"><tr><td style="padding-bottom:4px;font:12px/13px tahoma,helvetica,sans-serif;color:gray" align=center>Click on one of these super sexy buttons to fire a CSW query.</td></tr></table>'
           }
           ,{
              columnWidth : 0.10
@@ -283,7 +283,7 @@ function init() {
                      text : services[i].data.type
                     ,url  : services[i].data.url
                     ,qtip : services[i].data.type + (keywords.length > 0 ? ' keywords: ' + keywords.join(', ') : '')
-                    ,leaf : !new RegExp(/service=sos/i).test(services[i].data.url)
+                    ,leaf : !new RegExp(/service=(sos|wms)/i).test(services[i].data.url)
                     ,gpId : rec.id
                   });
                 }
@@ -301,7 +301,13 @@ function init() {
                   ,bodyStyle   : 'background-color:transparent'
                   ,loader      : new Ext.tree.TreeLoader({
                     directFn : function(nodeId,callback) {
-                      sosGetCaps(tp.getNodeById(nodeId),callback);
+                      var node = tp.getNodeById(nodeId);
+                      if (new RegExp(/service=sos/i).test(node.attributes.url)) {
+                        sosGetCaps(node,callback);
+                      }
+                      else if (new RegExp(/service=wms/i).test(node.attributes.url)) {
+                        wmsGetCaps(node,callback);
+                      }
                     }
                   })
                   ,listeners   : {
@@ -704,6 +710,39 @@ function getProperties(attr) {
     p[attr.offering.properties[i]] = attr.offering.getObsUrl(attr.offering.properties[i]);
   }
   return p;
+}
+
+function wmsGetCaps(node,cb) {
+  if (knownGetCaps[node.attributes.url]) {
+    Ext.Msg.alert('Error','This service has already been added to your map.');
+    cb([],{status : true});
+    return;
+  }
+  knownGetCaps[node.attributes.url] = true;
+  OpenLayers.Request.issue({
+     url      : 'get.php?url=' + encodeURIComponent(node.attributes.url)
+    ,callback : function(r) {
+      var caps = new OpenLayers.Format.WMSCapabilities().read(r.responseText);
+      var nodesByText = {};
+      var nodesText   = [];
+      for (var i = 0; i < caps.capability.layers.length; i++) {
+        nodesByText[caps.capability.layers[i].title + ' (' + caps.capability.layers[i].name + ')'] = {
+           id   : caps.capability.layers[i].name
+          ,text : caps.capability.layers[i].title + ' (' + caps.capability.layers[i].name + ')'
+          ,qtip : caps.capability.layers[i].title + ' (' + caps.capability.layers[i].name + ')'
+          ,leaf : true
+          ,icon : 'img/layer16.png'
+        };
+        nodesText.push(caps.capability.layers[i].title + ' (' + caps.capability.layers[i].name + ')');
+      }
+      nodesText.sort();
+      var nodes = [];
+      for (var i = 0; i < nodesText.length; i++) {
+        nodes.push(nodesByText[nodesText[i]]);
+      }
+      cb(nodes,{status : true});
+    }
+  });
 }
 
 function goQueryGridPanelRowById(gpId,focus) {
