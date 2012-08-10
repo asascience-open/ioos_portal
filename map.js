@@ -1,3 +1,9 @@
+var sampleCSW = {
+   'SOS' : '<?xml version="1.0"?>  <csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" version="2.0.2" service="CSW" resultType="results" outputSchema="http://www.isotc211.org/2005/gmd" startPosition="1" maxRecords="1000">   <csw:Query typeNames="csw:Record" xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml">   <csw:ElementSetName>full</csw:ElementSetName>    <csw:Constraint version="1.1.0">   <ogc:Filter>     <ogc:And>       <ogc:PropertyIsEqualTo>         <ogc:PropertyName>sys.siteuuid</ogc:PropertyName>         <ogc:Literal>{E4949969-468A-4B10-823D-9BF1BF0785B2}</ogc:Literal>       </ogc:PropertyIsEqualTo>       <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">          <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>         <ogc:Literal>*sos*</ogc:Literal>       </ogc:PropertyIsLike>     </ogc:And>    </ogc:Filter>  </csw:Constraint>  </csw:Query> </csw:GetRecords>'
+  ,'OPeNDAP' : '<?xml version="1.0"?>  <csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" version="2.0.2" service="CSW" resultType="results" outputSchema="http://www.isotc211.org/2005/gmd" startPosition="1" maxRecords="1000">   <csw:Query typeNames="csw:Record" xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml">   <csw:ElementSetName>full</csw:ElementSetName>    <csw:Constraint version="1.1.0">   <ogc:Filter>     <ogc:And>       <ogc:PropertyIsEqualTo>         <ogc:PropertyName>sys.siteuuid</ogc:PropertyName>         <ogc:Literal>{E4949969-468A-4B10-823D-9BF1BF0785B2}</ogc:Literal>       </ogc:PropertyIsEqualTo>       <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">          <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>         <ogc:Literal>*opendap*</ogc:Literal>       </ogc:PropertyIsLike>     </ogc:And>    </ogc:Filter>  </csw:Constraint>  </csw:Query> </csw:GetRecords>'
+  ,'WMS' : '<?xml version="1.0"?>  <csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" version="2.0.2" service="CSW" resultType="results"  outputSchema="http://www.isotc211.org/2005/gmd" startPosition="1" maxRecords="1000">   <csw:Query typeNames="csw:Record" xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml">   <csw:ElementSetName>full</csw:ElementSetName>    <csw:Constraint version="1.1.0">   <ogc:Filter>     <ogc:And>       <ogc:PropertyIsEqualTo>         <ogc:PropertyName>sys.siteuuid</ogc:PropertyName>         <ogc:Literal>{E4949969-468A-4B10-823D-9BF1BF0785B2}</ogc:Literal>       </ogc:PropertyIsEqualTo>       <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">          <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>         <ogc:Literal>*wms*</ogc:Literal>       </ogc:PropertyIsLike>     </ogc:And>    </ogc:Filter>  </csw:Constraint>  </csw:Query> </csw:GetRecords>'
+};
+
 var map;
 var highlightControl;
 var selectControl;
@@ -50,12 +56,12 @@ function init() {
           }
           ,new Ext.Button({
              columnWidth  : 0.20 
-            ,text         : 'sea_water_salinity search'
+            ,text         : 'WMS'
             ,toggleGroup  : 'searchGroup'
             ,allowDepress : false
             ,handler      : function() {
               var sto = Ext.getCmp('queryGridPanel').getStore();
-              sto.setBaseParam('url','http://www.ngdc.noaa.gov/geoportal/rest/find/document?rid=local&ridName=NOAA%27s%20Geophysical%20Data%20Center&searchText=startDate%3A%5B1800-01-01%20TO%202012-02-01%5D%20AND%20endDate%3A%5B2009-02-01%20TO%202100-01-01%5D%20%20AND%20sys.siteuuid%3A%22%7BE4949969-468A-4B10-823D-9BF1BF0785B2%7D%22&start=1&max=10&orderBy=relevance&maxSearchTimeMilliSec=10000&f=pjson');
+              sto.setBaseParam('xmlData',sampleCSW['WMS']);
               sto.load();
             }
           })
@@ -65,12 +71,12 @@ function init() {
           }
           ,new Ext.Button({
              columnWidth  : 0.20
-            ,text         : 'start date 2009-02-01 to end date 2012-02-01'
+            ,text         : 'OPeNDAP'
             ,toggleGroup  : 'searchGroup'
             ,allowDepress : false
             ,handler      : function() {
               var sto = Ext.getCmp('queryGridPanel').getStore();
-              sto.setBaseParam('url','http://www.ngdc.noaa.gov/geoportal/rest/find/document?rid=local&ridName=NOAA%27s%20Geophysical%20Data%20Center&searchText=keywords%3A%20sea_water_salinity%20AND%20sys.siteuuid%3A%22{E4949969-468A-4B10-823D-9BF1BF0785B2}%22&start=1&max=1000&orderBy=relevance&maxSearchTimeMilliSec=10000&f=pjson');
+              sto.setBaseParam('xmlData',sampleCSW['OPeNDAP']);
               sto.load();
             }
           })
@@ -86,7 +92,7 @@ function init() {
             ,pressed      : true
             ,handler      : function() {
               var sto = Ext.getCmp('queryGridPanel').getStore();
-              sto.setBaseParam('xmlData','<?xml version="1.0"?><csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" version="2.0.2" service="CSW" resultType="results" outputSchema="http://www.isotc211.org/2005/gmd" startPosition="1" maxRecords="1000"> <csw:Query typeNames="csw:Record" xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml"> <csw:ElementSetName>full</csw:ElementSetName> <csw:Constraint version="1.1.0"> <ogc:Filter> <ogc:And> <ogc:PropertyIsEqualTo> <ogc:PropertyName>sys.siteuuid</ogc:PropertyName> <ogc:Literal>{E4949969-468A-4B10-823D-9BF1BF0785B2}</ogc:Literal> </ogc:PropertyIsEqualTo> <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?"> <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName> <ogc:Literal>*sos*</ogc:Literal> </ogc:PropertyIsLike> </ogc:And> </ogc:Filter></csw:Constraint></csw:Query></csw:GetRecords>');
+              sto.setBaseParam('xmlData',sampleCSW['SOS']);
               sto.load();
             }
           })
@@ -278,7 +284,7 @@ function init() {
                      text : services[i].data.type
                     ,url  : services[i].data.url
                     ,qtip : services[i].data.type + (keywords.length > 0 ? ' keywords: ' + keywords.join(', ') : '')
-                    ,leaf : false
+                    ,leaf : !new RegExp(/service=sos/i).test(services[i].data.url)
                     ,gpId : rec.id
                   });
                 }
@@ -364,7 +370,7 @@ function init() {
   });
 
   var sto = Ext.getCmp('queryGridPanel').getStore();
-  sto.setBaseParam('xmlData','<?xml version="1.0"?><csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" version="2.0.2" service="CSW" resultType="results" outputSchema="http://www.isotc211.org/2005/gmd" startPosition="1" maxRecords="1000"> <csw:Query typeNames="csw:Record" xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml"> <csw:ElementSetName>full</csw:ElementSetName> <csw:Constraint version="1.1.0"> <ogc:Filter> <ogc:And> <ogc:PropertyIsEqualTo> <ogc:PropertyName>sys.siteuuid</ogc:PropertyName> <ogc:Literal>{E4949969-468A-4B10-823D-9BF1BF0785B2}</ogc:Literal> </ogc:PropertyIsEqualTo> <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?"> <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName> <ogc:Literal>*sos*</ogc:Literal> </ogc:PropertyIsLike> </ogc:And> </ogc:Filter></csw:Constraint></csw:Query></csw:GetRecords>');
+  sto.setBaseParam('xmlData',sampleCSW['SOS']);
   sto.load();
 }
 
