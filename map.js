@@ -78,48 +78,61 @@ function init() {
          ,border     : false
         }
         ,items    : [
-          {height : 50,baseHeight : 50,id : 'searchPanel',bodyStyle : 'padding : 6px',items : [
-            new Ext.ux.form.SearchField({
-               emptyText       : 'Enter a search string (* is a wildcard).'
-              ,border          : false
-              ,id              : 'anyTextSearchField'
-              ,paramName       : 'anyText'
-              ,width           : 400 - 2 - 2 * 6
-              ,onTrigger1Click : function() {
-                if(this.hasSearch){
-                    this.reset();
-                    // having a tough time w/ the focus, so force a reset for emptyText
-                    this.setRawValue(this.emptyText);
-                    this.el.addClass(this.emptyClass);
+          {height : 55,baseHeight : 55,id : 'searchPanel',bodyStyle : 'padding : 6px',items : [
+            {
+               layout : 'column'
+              ,border : false
+              ,defaults : {border : false}
+              ,items : [
+                new Ext.ux.form.SearchField({
+                   emptyText       : 'Enter a search string (* is a wildcard).'
+                  ,border          : false
+                  ,id              : 'anyTextSearchField'
+                  ,paramName       : 'anyText'
+                  ,columnWidth     : 0.80
+                  ,onTrigger1Click : function() {
+                    if(this.hasSearch){
+                        this.reset();
+                        // having a tough time w/ the focus, so force a reset for emptyText
+                        this.setRawValue(this.emptyText);
+                        this.el.addClass(this.emptyClass);
+                        var o = {start: 0};
+                        if (this.store) {
+                          this.store.baseParams = this.store.baseParams || {};
+                          this.store.baseParams[this.paramName] = '';
+                          this.store.reload({params:o});
+                        }
+                        this.triggers[0].hide();
+                        this.hasSearch = false;
+                    }
+                  }
+                  ,onTrigger2Click : function() {
+                    var v = this.getRawValue();
+                    if(v.length < 1){
+                        this.onTrigger1Click();
+                        return;
+                    }
                     var o = {start: 0};
                     if (this.store) {
                       this.store.baseParams = this.store.baseParams || {};
-                      this.store.baseParams[this.paramName] = '';
+                      this.store.baseParams[this.paramName] = v;
                       this.store.reload({params:o});
                     }
-                    this.triggers[0].hide();
-                    this.hasSearch = false;
-                }
-              }
-              ,onTrigger2Click : function() {
-                var v = this.getRawValue();
-                if(v.length < 1){
-                    this.onTrigger1Click();
-                    return;
-                }
-                var o = {start: 0};
-                if (this.store) {
-                  this.store.baseParams = this.store.baseParams || {};
-                  this.store.baseParams[this.paramName] = v;
-                  this.store.reload({params:o});
-                }
-                var sto = Ext.getCmp('queryGridPanel').getStore();
-                sto.setBaseParam('xmlData',sampleCSW['AnyText'].replace('___ANYTEXT___',v));
-                sto.load();
-                this.hasSearch = true;
-                this.triggers[0].show();
-              }
-            })
+                    var sto = Ext.getCmp('queryGridPanel').getStore();
+                    sto.setBaseParam('xmlData',sampleCSW['AnyText'].replace('___ANYTEXT___',v));
+                    sto.load();
+                    this.hasSearch = true;
+                    this.triggers[0].show();
+                  }
+                })
+                ,{html : '&nbsp;',columnWidth : 0.05}
+                ,new Ext.Button({
+                   columnWidth : 0.15
+                  ,text : 'Go!'
+                })
+              ]
+            }
+            ,{html : '&nbsp;',border : false,height : 4}
             ,new Ext.form.FieldSet({
                title          : '&nbsp;Advanced search options&nbsp;'
               ,collapsible    : true
@@ -190,7 +203,7 @@ function init() {
           ]}
           ,new Ext.grid.GridPanel({
              id               : 'queryGridPanel'
-            ,anchor           : '100% -50'
+            ,anchor           : '100% -55'
             ,store            : new Ext.data.XmlStore({
               proxy       : new Ext.data.HttpProxy({
                  method : 'POST'
@@ -236,6 +249,9 @@ function init() {
                     knownToolTips[i].destroy();
                   }
                   knownToolTips = [];
+                  Ext.getCmp('queryGridPanel').body.applyStyles({
+                    'border-top' : '1px solid #99BBE8'
+                  });
                 }
                 ,load      : function(sto) {
                   var features = [];
@@ -279,6 +295,11 @@ function init() {
                   lyr.addFeatures(features);
                   if (sto.getCount() > 0) {
                     map.zoomToExtent(lyr.getDataExtent());
+                  }
+                  else {
+                    Ext.getCmp('queryGridPanel').body.applyStyles({
+                      'border-top' : 'none'
+                    });
                   }
                   var countTxt = 'No records fetched.';
                   if (sto.getCount() == 1) {

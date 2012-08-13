@@ -121,6 +121,6 @@ div.olControlMousePosition {
   color : gray;
 }
 
-#queryGridPanel {
+.borderTop {
   border-top: 1px solid #99BBE8;
 }
