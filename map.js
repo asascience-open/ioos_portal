@@ -51,7 +51,7 @@ function init() {
         ,items     : [
           {
              columnWidth : 0.50
-            ,html        : '<table width="100%"><tr><td style="padding-bottom:4px;font:12px/13px tahoma,helvetica,sans-serif;color:gray" align=center>Click on one of these super sexy buttons to fire a CSW query.</td></tr></table>'
+            ,html        : '<table width="100%"><tr><td style="padding-bottom:4px;font:12px/13px tahoma,helvetica,sans-serif;color:gray" align=center>Click on one of these super sexy buttons to fire a sample service-oriented query.</td></tr></table>'
           }
           ,{
              columnWidth : 0.10
@@ -69,10 +69,10 @@ function init() {
               new Ext.Button({
                  columnWidth  : 0.30 
                 ,text         : 'WMS'
-                ,id           : 'wmsSearchButton'
                 ,toggleGroup  : 'searchGroup'
                 ,allowDepress : false
                 ,handler      : function() {
+                  Ext.getCmp('anyTextSearchField').reset();
                   var sto = Ext.getCmp('queryGridPanel').getStore();
                   sto.setBaseParam('xmlData',sampleCSW['WMS']);
                   sto.load();
@@ -88,6 +88,7 @@ function init() {
                 ,toggleGroup  : 'searchGroup'
                 ,allowDepress : false
                 ,handler      : function() {
+                  Ext.getCmp('anyTextSearchField').reset();
                   var sto = Ext.getCmp('queryGridPanel').getStore();
                   sto.setBaseParam('xmlData',sampleCSW['OPeNDAP']);
                   sto.load();
@@ -104,6 +105,7 @@ function init() {
                 ,allowDepress : false
                 ,pressed      : true
                 ,handler      : function() {
+                  Ext.getCmp('anyTextSearchField').reset();
                   var sto = Ext.getCmp('queryGridPanel').getStore();
                   sto.setBaseParam('xmlData',sampleCSW['SOS']);
                   sto.load();
