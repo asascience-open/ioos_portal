@@ -2,9 +2,11 @@ var sampleCSW = {
    'SOS' : '<?xml version="1.0"?>  <csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" version="2.0.2" service="CSW" resultType="results" outputSchema="http://www.isotc211.org/2005/gmd" startPosition="1" maxRecords="1000">   <csw:Query typeNames="csw:Record" xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml">   <csw:ElementSetName>full</csw:ElementSetName>    <csw:Constraint version="1.1.0">   <ogc:Filter>     <ogc:And>       <ogc:PropertyIsEqualTo>         <ogc:PropertyName>sys.siteuuid</ogc:PropertyName>         <ogc:Literal>{E4949969-468A-4B10-823D-9BF1BF0785B2}</ogc:Literal>       </ogc:PropertyIsEqualTo>       <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">          <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>         <ogc:Literal>*sos*</ogc:Literal>       </ogc:PropertyIsLike>     </ogc:And>    </ogc:Filter>  </csw:Constraint>  </csw:Query> </csw:GetRecords>'
   ,'OPeNDAP' : '<?xml version="1.0"?>  <csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" version="2.0.2" service="CSW" resultType="results" outputSchema="http://www.isotc211.org/2005/gmd" startPosition="1" maxRecords="1000">   <csw:Query typeNames="csw:Record" xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml">   <csw:ElementSetName>full</csw:ElementSetName>    <csw:Constraint version="1.1.0">   <ogc:Filter>     <ogc:And>       <ogc:PropertyIsEqualTo>         <ogc:PropertyName>sys.siteuuid</ogc:PropertyName>         <ogc:Literal>{E4949969-468A-4B10-823D-9BF1BF0785B2}</ogc:Literal>       </ogc:PropertyIsEqualTo>       <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">          <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>         <ogc:Literal>*opendap*</ogc:Literal>       </ogc:PropertyIsLike>     </ogc:And>    </ogc:Filter>  </csw:Constraint>  </csw:Query> </csw:GetRecords>'
   ,'WMS' : '<?xml version="1.0"?>  <csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" version="2.0.2" service="CSW" resultType="results"  outputSchema="http://www.isotc211.org/2005/gmd" startPosition="1" maxRecords="1000">   <csw:Query typeNames="csw:Record" xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml">   <csw:ElementSetName>full</csw:ElementSetName>    <csw:Constraint version="1.1.0">   <ogc:Filter>     <ogc:And>       <ogc:PropertyIsEqualTo>         <ogc:PropertyName>sys.siteuuid</ogc:PropertyName>         <ogc:Literal>{E4949969-468A-4B10-823D-9BF1BF0785B2}</ogc:Literal>       </ogc:PropertyIsEqualTo>       <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">          <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>         <ogc:Literal>*wms*</ogc:Literal>       </ogc:PropertyIsLike>     </ogc:And>    </ogc:Filter>  </csw:Constraint>  </csw:Query> </csw:GetRecords>'
+  ,'AnyText' : '<?xml version="1.0"?>  <csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" version="2.0.2" service="CSW" resultType="results" outputSchema="http://www.isotc211.org/2005/gmd" startPosition="1" maxRecords="1000">   <csw:Query typeNames="csw:Record" xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml">   <csw:ElementSetName>full</csw:ElementSetName>    <csw:Constraint version="1.1.0">   <ogc:Filter>     <ogc:And>       <ogc:PropertyIsEqualTo>         <ogc:PropertyName>sys.siteuuid</ogc:PropertyName>         <ogc:Literal>{E4949969-468A-4B10-823D-9BF1BF0785B2}</ogc:Literal>       </ogc:PropertyIsEqualTo>       <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">          <ogc:PropertyName>AnyText</ogc:PropertyName>         <ogc:Literal>___ANYTEXT___</ogc:Literal>       </ogc:PropertyIsLike>     </ogc:And>    </ogc:Filter>  </csw:Constraint>  </csw:Query> </csw:GetRecords>'
 };
 
 var map;
+
 var highlightControl;
 var selectControl;
 var toolTipQueue  = [];
@@ -44,62 +46,122 @@ function init() {
         ,id        : 'searchControlPanel'
         ,height    : 50
         ,layout    : 'column'
+        ,bodyStyle : 'padding : 0px 6px 0px 6px'
         ,defaults  : {border : false}
         ,items     : [
           {
-             columnWidth : 1
+             columnWidth : 0.50
             ,html        : '<table width="100%"><tr><td style="padding-bottom:4px;font:12px/13px tahoma,helvetica,sans-serif;color:gray" align=center>Click on one of these super sexy buttons to fire a CSW query.</td></tr></table>'
           }
           ,{
              columnWidth : 0.10
             ,html        : '&nbsp;'
           }
-          ,new Ext.Button({
-             columnWidth  : 0.20 
-            ,text         : 'WMS'
-            ,toggleGroup  : 'searchGroup'
-            ,allowDepress : false
-            ,handler      : function() {
-              var sto = Ext.getCmp('queryGridPanel').getStore();
-              sto.setBaseParam('xmlData',sampleCSW['WMS']);
-              sto.load();
-            }
-          })
+          ,{
+             columnWidth : 0.40
+            ,html        : '<table width="100%"><tr><td style="padding-bottom:4px;font:12px/13px tahoma,helvetica,sans-serif;color:gray" align=center>Or use free text search below.</td></tr></table>'
+          }
+          ,{
+             columnWidth : 0.50
+            ,layout      : 'column'
+            ,defaults    : {border : false}
+            ,items       : [
+              new Ext.Button({
+                 columnWidth  : 0.30 
+                ,text         : 'WMS'
+                ,id           : 'wmsSearchButton'
+                ,toggleGroup  : 'searchGroup'
+                ,allowDepress : false
+                ,handler      : function() {
+                  var sto = Ext.getCmp('queryGridPanel').getStore();
+                  sto.setBaseParam('xmlData',sampleCSW['WMS']);
+                  sto.load();
+                }
+              })
+              ,{
+                 columnWidth : 0.05
+                ,html        : '&nbsp;'
+              }
+              ,new Ext.Button({
+                 columnWidth  : 0.30
+                ,text         : 'OPeNDAP'
+                ,toggleGroup  : 'searchGroup'
+                ,allowDepress : false
+                ,handler      : function() {
+                  var sto = Ext.getCmp('queryGridPanel').getStore();
+                  sto.setBaseParam('xmlData',sampleCSW['OPeNDAP']);
+                  sto.load();
+                }
+              })
+              ,{
+                 columnWidth : 0.05
+                ,html        : '&nbsp;'
+              }
+              ,new Ext.Button({
+                 columnWidth  : 0.30
+                ,text         : 'SOS'
+                ,toggleGroup  : 'searchGroup'
+                ,allowDepress : false
+                ,pressed      : true
+                ,handler      : function() {
+                  var sto = Ext.getCmp('queryGridPanel').getStore();
+                  sto.setBaseParam('xmlData',sampleCSW['SOS']);
+                  sto.load();
+                }
+              })
+              ,new Ext.Button({
+                 columnWidth  : 0.30
+                ,id           : 'anyTextButton'
+                ,hidden       : true
+                ,toggleGroup  : 'searchGroup'
+                ,allowDepress : false
+              })
+            ]
+          }
           ,{
              columnWidth : 0.10
             ,html        : '&nbsp;'
           }
-          ,new Ext.Button({
-             columnWidth  : 0.20
-            ,text         : 'OPeNDAP'
-            ,toggleGroup  : 'searchGroup'
-            ,allowDepress : false
-            ,handler      : function() {
-              var sto = Ext.getCmp('queryGridPanel').getStore();
-              sto.setBaseParam('xmlData',sampleCSW['OPeNDAP']);
+          ,new Ext.ux.form.SearchField({
+             columnWidth     : 0.40
+            ,emptyText       : 'Enter a search string (* is a wildcard).'
+            ,id              : 'anyTextSearchField'
+            ,paramName       : 'anyText'
+            ,onTrigger1Click : function() {
+              if(this.hasSearch){
+                  this.reset();
+                  // having a tough time w/ the focus, so force a reset for emptyText
+                  this.setRawValue(this.emptyText);
+                  this.el.addClass(this.emptyClass);
+                  var o = {start: 0};
+                  if (this.store) {
+                    this.store.baseParams = this.store.baseParams || {};
+                    this.store.baseParams[this.paramName] = '';
+                    this.store.reload({params:o});
+                  }
+                  this.triggers[0].hide();
+                  this.hasSearch = false;
+              }
+            }
+            ,onTrigger2Click : function() {
+              var v = this.getRawValue();
+              if(v.length < 1){
+                  this.onTrigger1Click();
+                  return;
+              }
+              var o = {start: 0};
+              if (this.store) {
+                this.store.baseParams = this.store.baseParams || {};
+                this.store.baseParams[this.paramName] = v;
+                this.store.reload({params:o});
+              }
+              sto.setBaseParam('xmlData',sampleCSW['AnyText'].replace('___ANYTEXT___',v));
+              Ext.getCmp('anyTextButton').toggle(true);
               sto.load();
+              this.hasSearch = true;
+              this.triggers[0].show();
             }
           })
-          ,{
-             columnWidth : 0.10
-            ,html        : '&nbsp;'
-          }
-          ,new Ext.Button({
-             columnWidth  : 0.20
-            ,text         : 'SOS'
-            ,toggleGroup  : 'searchGroup'
-            ,allowDepress : false
-            ,pressed      : true
-            ,handler      : function() {
-              var sto = Ext.getCmp('queryGridPanel').getStore();
-              sto.setBaseParam('xmlData',sampleCSW['SOS']);
-              sto.load();
-            }
-          })
-          ,{
-             columnWidth : 0.10
-            ,html        : '&nbsp;'
-          }
         ]
       }
       ,{
@@ -224,7 +286,17 @@ function init() {
                 });
                 var lyr = map.getLayersByName('queryHits')[0];
                 lyr.addFeatures(features);
-                map.zoomToExtent(lyr.getDataExtent());
+                if (sto.getCount() > 0) {
+                  map.zoomToExtent(lyr.getDataExtent());
+                }
+                var countTxt = 'No records fetched.';
+                if (sto.getCount() == 1) {
+                  countTxt = '1 record fetched.';
+                }
+                else {
+                  countTxt = sto.getCount() + ' records fetched.';
+                }
+                Ext.getCmp('searchResultsRecordsCounter').setText(countTxt);
               }
             }
             ,sortInfo  : {field : 'title',direction : 'ASC'}
@@ -364,6 +436,20 @@ function init() {
               findAndZoomToFeatureById(rec.id);
             }}
           })
+          ,bbar       : {items : [
+             {
+               text    : 'Zoom to include all results'
+              ,icon    : 'img/zoom_extend.png'
+              ,handler : function() {
+                map.zoomToExtent(map.getLayersByName('queryHits')[0].getDataExtent());
+              }
+            }
+            ,'->'
+            ,{
+               text : 'No records fetched.'
+              ,id   : 'searchResultsRecordsCounter'
+            }
+          ]}
           ,listeners : {resize : function(gp,w,h) {
             gp.getStore().each(function(rec) {
               Ext.getCmp(rec.id + 'treePanel').setWidth(w - 35);
@@ -429,10 +515,10 @@ function initMap() {
     ]
     ,displayProjection : proj4326
   });
-  var bounds = new OpenLayers.Bounds();
-  bounds.extend(new OpenLayers.LonLat(-245.5468750000121,-88.25704028272001).transform(proj4326,proj900913));
-  bounds.extend(new OpenLayers.LonLat(224.1406249999924,88.9309349605731).transform(proj4326,proj900913));
-  map.zoomToExtent(bounds);
+  var initBounds = new OpenLayers.Bounds();
+  initBounds.extend(new OpenLayers.LonLat(-245.5468750000121,-88.25704028272001).transform(proj4326,proj900913));
+  initBounds.extend(new OpenLayers.LonLat(224.1406249999924,88.9309349605731).transform(proj4326,proj900913));
+  map.zoomToExtent(initBounds);
 
   map.getLayersByName('queryHits')[0].events.register('featuresadded',this,function(e) {
     var win = Ext.getCmp('mappedFeaturesWin');

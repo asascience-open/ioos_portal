@@ -109,3 +109,7 @@ div.olControlMousePosition {
   font-size: 10px;
   background-image : url(img/bg.png);
 }
+
+#anyTextSearchField {
+  margin-bottom : 2px;
+}
