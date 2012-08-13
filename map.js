@@ -44,115 +44,6 @@ function init() {
     ,id     : 'viewport'
     ,items  : [
       {
-         region     : 'north'
-        ,id         : 'searchControlPanel'
-        ,height     : 60
-        ,baseHeight : 60
-        ,bodyStyle  : 'padding : 6px'
-        ,items      : [
-          new Ext.ux.form.SearchField({
-             emptyText       : 'Enter a search string (* is a wildcard).'
-            ,id              : 'anyTextSearchField'
-            ,paramName       : 'anyText'
-            ,width           : 400
-            ,onTrigger1Click : function() {
-              if(this.hasSearch){
-                  this.reset();
-                  // having a tough time w/ the focus, so force a reset for emptyText
-                  this.setRawValue(this.emptyText);
-                  this.el.addClass(this.emptyClass);
-                  var o = {start: 0};
-                  if (this.store) {
-                    this.store.baseParams = this.store.baseParams || {};
-                    this.store.baseParams[this.paramName] = '';
-                    this.store.reload({params:o});
-                  }
-                  this.triggers[0].hide();
-                  this.hasSearch = false;
-              }
-            }
-            ,onTrigger2Click : function() {
-              var v = this.getRawValue();
-              if(v.length < 1){
-                  this.onTrigger1Click();
-                  return;
-              }
-              var o = {start: 0};
-              if (this.store) {
-                this.store.baseParams = this.store.baseParams || {};
-                this.store.baseParams[this.paramName] = v;
-                this.store.reload({params:o});
-              }
-              var sto = Ext.getCmp('queryGridPanel').getStore();
-              sto.setBaseParam('xmlData',sampleCSW['AnyText'].replace('___ANYTEXT___',v));
-              sto.load();
-              this.hasSearch = true;
-              this.triggers[0].show();
-            }
-          })
-          ,new Ext.form.FieldSet({
-             title          : '&nbsp;Advanced search options&nbsp;'
-            ,width          : 400
-            ,collapsible    : true
-            ,collapsed      : true
-            ,labelWidth     : 250
-            ,labelSeparator : ''
-            ,items          : [
-              new Ext.form.RadioGroup({
-                 fieldLabel : 'Restrict results to map boundaries?'
-                ,id         : 'searchMapBoundsRadioGroup'
-                ,columns    : [50,40]
-                ,items      : [
-                   {boxLabel : 'Yes',name : 'mapBoundsRadioGroup',id : 'mapBoundsRadioGroupYes'}
-                  ,{boxLabel : 'No' ,name : 'mapBoundsRadioGroup',id : 'mapBoundsRadioGroupNo' ,checked : true}
-                ]
-              })
-              ,{border : false,cls : 'directions',height : 25,html : '<table><tr><td>Any option below that is left blank will be ignored.</td></tr></table>'}
-              ,new Ext.form.DateField({
-                 fieldLabel : 'Show results no older than this date:'
-                ,id         : 'searchStartDate'
-                ,width      : 100
-              })
-              ,new Ext.form.DateField({
-                 fieldLabel : 'Show results no newer than this date:'
-                ,id         : 'searchEndDate'
-                ,width      : 100
-              })
-              ,new Ext.form.CheckboxGroup({
-                 fieldLabel : 'Restrict results to these services:'
-                ,columns    : 1
-                ,items      : [
-                   {boxLabel : 'OPeNDAP',name : 'serviceCheckboxOpendap'}
-                  ,{boxLabel : 'SOS'    ,name : 'serviceCheckboxSos'}
-                  ,{boxLabel : 'WMS'    ,name : 'serviceCheckboxWms'}
-                ]
-              })
-              ,{html : '<img src="img/blank.png" height=5>',border : false}
-              ,{layout : 'column',border : false,defaults : {border : false},items : [
-                 {html : '&nbsp;',columnWidth : 0.2}
-                ,new Ext.Button({
-                   columnWidth : 0.6
-                  ,text        : 'Clear advanced search options'
-                })
-                ,{html : '&nbsp;',columnWidth : 0.2}
-              ]}
-            ]
-            ,listeners   : {afterrender : function(p) {
-              p.addListener('expand',function(p) {
-                var searchControlPanel = Ext.getCmp('searchControlPanel');
-                searchControlPanel.setHeight(searchControlPanel.baseHeight + p.getHeight() - 20);
-                Ext.getCmp('viewport').doLayout();
-              });
-              p.addListener('collapse',function(p) {
-                var searchControlPanel = Ext.getCmp('searchControlPanel');
-                searchControlPanel.setHeight(searchControlPanel.baseHeight);
-                Ext.getCmp('viewport').doLayout();
-              });
-            }}
-          })
-        ]
-      }
-      ,{
          region    : 'center'
         ,layout    : 'fit'
         ,split     : true
@@ -180,263 +71,376 @@ function init() {
         ,id       : 'searchResultsPanel'
         ,width    : 400
         ,minWidth : 200
-        ,layout   : 'fit'
+        ,layout   : 'anchor'
         ,split    : true
         ,defaults : {
-           border     : false
-          ,autoScroll : true
+          autoScroll : false
+         ,border     : false
         }
-        ,items    : new Ext.grid.GridPanel({
-           id               : 'queryGridPanel'
-          ,store            : new Ext.data.XmlStore({
-            proxy       : new Ext.data.HttpProxy({
-               method : 'POST'
-              ,url    : 'post.php?ns=gmi|srv|gmd|gco&url=' + encodeURIComponent('http://www.ngdc.noaa.gov/geoportal/csw')
+        ,items    : [
+          {height : 50,baseHeight : 50,id : 'searchPanel',bodyStyle : 'padding : 6px',items : [
+            new Ext.ux.form.SearchField({
+               emptyText       : 'Enter a search string (* is a wildcard).'
+              ,border          : false
+              ,id              : 'anyTextSearchField'
+              ,paramName       : 'anyText'
+              ,width           : 400 - 2 - 2 * 6
+              ,onTrigger1Click : function() {
+                if(this.hasSearch){
+                    this.reset();
+                    // having a tough time w/ the focus, so force a reset for emptyText
+                    this.setRawValue(this.emptyText);
+                    this.el.addClass(this.emptyClass);
+                    var o = {start: 0};
+                    if (this.store) {
+                      this.store.baseParams = this.store.baseParams || {};
+                      this.store.baseParams[this.paramName] = '';
+                      this.store.reload({params:o});
+                    }
+                    this.triggers[0].hide();
+                    this.hasSearch = false;
+                }
+              }
+              ,onTrigger2Click : function() {
+                var v = this.getRawValue();
+                if(v.length < 1){
+                    this.onTrigger1Click();
+                    return;
+                }
+                var o = {start: 0};
+                if (this.store) {
+                  this.store.baseParams = this.store.baseParams || {};
+                  this.store.baseParams[this.paramName] = v;
+                  this.store.reload({params:o});
+                }
+                var sto = Ext.getCmp('queryGridPanel').getStore();
+                sto.setBaseParam('xmlData',sampleCSW['AnyText'].replace('___ANYTEXT___',v));
+                sto.load();
+                this.hasSearch = true;
+                this.triggers[0].show();
+              }
             })
-            ,record     : 'gmi_MI_Metadata'
-            ,fields     : [
-               {name : 'title'          ,mapping : 'gmd_identificationInfo > gmd_MD_DataIdentification[id=DataIdentification] > gmd_citation > gmd_CI_Citation > gmd_title > gco_CharacterString'}
-              ,{name : 'summary'        ,mapping : 'gmd_identificationInfo > gmd_MD_DataIdentification[id=DataIdentification] > gmd_abstract > gco_CharacterString'}
-              ,{name : 'bboxWest'       ,mapping : 'gmd_identificationInfo > gmd_MD_DataIdentification[id=DataIdentification] > gmd_extent > gmd_EX_Extent > gmd_geographicElement > gmd_EX_GeographicBoundingBox > gmd_westBoundLongitude > gco_Decimal'}
-              ,{name : 'bboxEast'       ,mapping : 'gmd_identificationInfo > gmd_MD_DataIdentification[id=DataIdentification] > gmd_extent > gmd_EX_Extent > gmd_geographicElement > gmd_EX_GeographicBoundingBox > gmd_eastBoundLongitude > gco_Decimal'}
-              ,{name : 'bboxSouth'      ,mapping : 'gmd_identificationInfo > gmd_MD_DataIdentification[id=DataIdentification] > gmd_extent > gmd_EX_Extent > gmd_geographicElement > gmd_EX_GeographicBoundingBox > gmd_southBoundLatitude > gco_Decimal'}
-              ,{name : 'bboxNorth'      ,mapping : 'gmd_identificationInfo > gmd_MD_DataIdentification[id=DataIdentification] > gmd_extent > gmd_EX_Extent > gmd_geographicElement > gmd_EX_GeographicBoundingBox > gmd_northBoundLatitude > gco_Decimal'}
-              ,{name : 'services'       ,convert : (function(){
-                return function(v,n) {
-                  return new Ext.data.XmlReader({
-                     record : 'gmd_identificationInfo > srv_SV_ServiceIdentification'
-                    ,fields : [
-                       {name : 'type'    ,mapping : 'srv_serviceType > gco_LocalName'}
-                      ,{name : 'url'     ,mapping : 'srv_containsOperations > srv_SV_OperationMetadata > srv_connectPoint > gmd_CI_OnlineResource > gmd_linkage > gmd_URL'}
-                      ,{name : 'keywords',convert : (function(){
-                        return function(v,n) {
-                          return new Ext.data.XmlReader({
-                             record : 'srv_keywords > gmd_MD_Keywords > gmd_keyword'
-                            ,fields : [
-                              {name : 'keyword',mapping : 'gco_CharacterString'}
-                            ]
-                          }).readRecords(n).records;
-                        }
-                      })()}
-                    ]
-                  }).readRecords(n).records;
-                }
-              })()}
-            ]
-            ,listeners  : {
-              beforeload : function(sto) {
-                var lyr = map.getLayersByName('queryHits')[0];
-                if (lyr && lyr.features) {
-                  lyr.removeFeatures(lyr.features);
-                }
-                for (var i = 0; i < knownToolTips.length; i++) {
-                  knownToolTips[i].destroy();
-                }
-                knownToolTips = [];
-              }
-              ,load      : function(sto) {
-                var features = [];
-                sto.each(function(rec) {
-                  var g = {
-                     type        : 'Polygon'
-                    ,coordinates : [[
-                       [rec.get('bboxWest'),rec.get('bboxSouth')]
-                      ,[rec.get('bboxEast'),rec.get('bboxSouth')]
-                      ,[rec.get('bboxEast'),rec.get('bboxNorth')]
-                      ,[rec.get('bboxWest'),rec.get('bboxNorth')]
-                      ,[rec.get('bboxWest'),rec.get('bboxSouth')]
-                    ]]
-                  };
-                  var geojson = new OpenLayers.Format.GeoJSON();
-                  var f       = geojson.read({
-                     type     : 'FeatureCollection'
-                    ,features : [{
-                       type       : 'Feature'
-                      ,geometry   : g
-                      ,properties : {
-                         title   : rec.get('title')
-                        ,summary : rec.get('summary')
-                        ,id      : rec.id
-                      }
-                    }]
-                  });
-                  f[0].geometry.transform(proj4326,proj900913);
-                  // change geometry from polygon to line
-                  if (f[0].geometry.getArea() == 0) {
-                    f[0].geometry = f[0].geometry.getVertices()[0];
-                  }
-                  else {
-                    var vertices = f[0].geometry.getVertices();
-                    vertices.push(vertices[0]);
-                    f[0].geometry = new OpenLayers.Geometry.LineString(vertices);
-                  }
-                  features.push(f[0]);
-                });
-                var lyr = map.getLayersByName('queryHits')[0];
-                lyr.addFeatures(features);
-                if (sto.getCount() > 0) {
-                  map.zoomToExtent(lyr.getDataExtent());
-                }
-                var countTxt = 'No records fetched.';
-                if (sto.getCount() == 1) {
-                  countTxt = '1 record fetched.';
-                }
-                else {
-                  countTxt = sto.getCount() + ' records fetched.';
-                }
-                Ext.getCmp('searchResultsRecordsCounter').setText(countTxt);
-              }
-            }
-            ,sortInfo  : {field : 'title',direction : 'ASC'}
-          })
-          ,columns          : [
-            {renderer : function(val,metadata,rec) {
-              return '<p id="' + rec.id + 'toolTip" class="title"><b><a href="javascript:var foo = findAndZoomToFeatureById(\'' + rec.id + '\')"><img style="margin-bottom:-1px" src="img/zoom.png">' + rec.get('title') + '</a></b></p>' + '<div id="' + rec.id + '"></div>';
-            }}
-          ]
-          ,viewConfig       : {
-             forceFit      : true
-            ,enableRowBody : true
-            ,getRowClass   : function(rec,idx,p,store) {
-              p.body = [
-                '<p class="summary">' + rec.get('summary') + '</p>'
-              ].join('');
-              return 'x-grid3-row-expanded';
-            }
-            ,onRowOver     : function(e,target) {
-              // sadly, this is not a listener
-              var row = this.findRowIndex(target);
-              if (row !== false) {
-                this.addRowClass(row,this.rowOverCls);
-                var lyr = map.getLayersByName('queryHits')[0];
-                var rec = this.grid.getStore().getAt(row);
-                for (var i = 0; i < lyr.features.length; i++) {
-                  if (lyr.features[i].attributes.id == rec.id) {
-                    highlightControl.highlight(lyr.features[i]);
-                  }
-                  else {
-                    highlightControl.unhighlight(lyr.features[i]);
-                  }
-                }
-              }
-            }
-            ,listeners     : {refresh : function(view) {
-              knownGetCaps = {};
-              Ext.getCmp('queryGridPanel').getSelectionModel().clearSelections();
-              var sto = view.grid.getStore();
-              sto.each(function(rec) {
-                new Ext.ToolTip({
-                   html   : 'Zoom to ' + rec.get('title')
-                  ,target : rec.id + 'toolTip'
-                });
-                var children = [];
-                var services = rec.get('services');
-                for (var i = 0; i < services.length; i++) {
-                  var keywords = [];
-                  for (var j = 0; j < services[i].data.keywords.length; j++) {
-                    if (services[i].data.keywords[j].data.keyword != '') {
-                      keywords.push(services[i].data.keywords[j].data.keyword);
-                    }
-                  }
-                  keywords.sort();
-                  children.push({
-                     text : services[i].data.type
-                    ,url  : services[i].data.url
-                    ,qtip : services[i].data.type + (keywords.length > 0 ? ' keywords: ' + keywords.join(', ') : '')
-                    ,leaf : !new RegExp(/service=(sos|wms)/i).test(services[i].data.url)
-                    ,gpId : rec.id
-                  });
-                }
-                var tp = new Ext.tree.TreePanel({
-                   renderTo    : rec.id
-                  ,id          : rec.id + 'treePanel'
-                  ,width       : Ext.getCmp('queryGridPanel').getWidth() - 35
-                  ,border      : false
-                  ,rootVisible : false
-                  ,root        : new Ext.tree.AsyncTreeNode({children : [{
-                     text      : 'Services'
-                    ,children  : children
-                    ,qtip      : 'Expand to view available data services'
-                  }]})
-                  ,bodyStyle   : 'background-color:transparent'
-                  ,loader      : new Ext.tree.TreeLoader({
-                    directFn : function(nodeId,callback) {
-                      var node = tp.getNodeById(nodeId);
-                      if (new RegExp(/service=sos/i).test(node.attributes.url)) {
-                        sosGetCaps(node,callback);
-                      }
-                      else if (new RegExp(/service=wms/i).test(node.attributes.url)) {
-                        wmsGetCaps(node,callback);
-                      }
-                    }
+            ,new Ext.form.FieldSet({
+               title          : '&nbsp;Advanced search options&nbsp;'
+              ,collapsible    : true
+              ,collapsed      : true
+              ,labelWidth     : 250
+              ,labelSeparator : ''
+              ,items          : [
+                new Ext.form.RadioGroup({
+                   fieldLabel : 'Restrict results to map boundaries?'
+                  ,id         : 'searchMapBoundsRadioGroup'
+                  ,columns    : [50,40]
+                  ,items      : [
+                     {boxLabel : 'Yes',name : 'mapBoundsRadioGroup',id : 'mapBoundsRadioGroupYes'}
+                    ,{boxLabel : 'No' ,name : 'mapBoundsRadioGroup',id : 'mapBoundsRadioGroupNo' ,checked : true}
+                  ]
+                })
+                ,{border : false,cls : 'directions',height : 25,html : '<table><tr><td>Any option below that is left blank will be ignored.</td></tr></table>'}
+                ,new Ext.form.DateField({
+                   fieldLabel : 'Show results no older than this date:'
+                  ,id         : 'searchStartDate'
+                  ,width      : 100
+                })
+                ,new Ext.form.DateField({
+                   fieldLabel : 'Show results no newer than this date:'
+                  ,id         : 'searchEndDate'
+                  ,width      : 100
+                })
+                ,new Ext.form.CheckboxGroup({
+                   fieldLabel : 'Restrict results to these services:'
+                  ,columns    : 1
+                  ,items      : [
+                     {boxLabel : 'OPeNDAP',name : 'serviceCheckboxOpendap'}
+                    ,{boxLabel : 'SOS'    ,name : 'serviceCheckboxSos'}
+                    ,{boxLabel : 'WMS'    ,name : 'serviceCheckboxWms'}
+                  ]
+                })
+                ,{html : '<img src="img/blank.png" height=5>',border : false}
+                ,{layout : 'column',border : false,defaults : {border : false},items : [
+                   {html : '&nbsp;',columnWidth : 0.2}
+                  ,new Ext.Button({
+                     columnWidth : 0.6
+                    ,text        : 'Clear advanced search options'
                   })
-                  ,listeners   : {
-                    click : function(node,e) {
-                      goQueryGridPanelRowById(node.attributes.gpId ? node.attributes.gpId : node.parentNode.attributes.gpId,false);
-                      if (node.leaf) {
-                        if (!findAndZoomToFeatureById(node.id)) {
-                          Ext.Msg.alert('Unknown service',"I'm sorry, but I don't know how to process this <a target=_blank href='" + node.attributes.url + "'>" + node.attributes.text + "</a> service.");
+                  ,{html : '&nbsp;',columnWidth : 0.2}
+                ]}
+              ]
+              ,listeners   : {afterrender : function(p) {
+                p.addListener('expand',function(p) {
+                  var searchPanel = Ext.getCmp('searchPanel');
+                  searchPanel.setHeight(searchPanel.baseHeight + p.getHeight() - 12);
+                  searchPanel.doLayout();
+                  var queryGridPanel = Ext.getCmp('queryGridPanel');
+                  delete queryGridPanel.anchorSpec;
+                  queryGridPanel.anchor = '100% -' + searchPanel.getHeight();
+                  Ext.getCmp('searchResultsPanel').doLayout();
+                });
+                p.addListener('collapse',function(p) {
+                  var searchPanel = Ext.getCmp('searchPanel');
+                  searchPanel.setHeight(searchPanel.baseHeight);
+                  searchPanel.doLayout();
+                  var queryGridPanel = Ext.getCmp('queryGridPanel');
+                  delete queryGridPanel.anchorSpec;
+                  queryGridPanel.anchor = '100% -' + searchPanel.getHeight();
+                  Ext.getCmp('searchResultsPanel').doLayout();
+                });
+              }}
+            })
+          ]}
+          ,new Ext.grid.GridPanel({
+             id               : 'queryGridPanel'
+            ,anchor           : '100% -50'
+            ,store            : new Ext.data.XmlStore({
+              proxy       : new Ext.data.HttpProxy({
+                 method : 'POST'
+                ,url    : 'post.php?ns=gmi|srv|gmd|gco&url=' + encodeURIComponent('http://www.ngdc.noaa.gov/geoportal/csw')
+              })
+              ,record     : 'gmi_MI_Metadata'
+              ,fields     : [
+                 {name : 'title'          ,mapping : 'gmd_identificationInfo > gmd_MD_DataIdentification[id=DataIdentification] > gmd_citation > gmd_CI_Citation > gmd_title > gco_CharacterString'}
+                ,{name : 'summary'        ,mapping : 'gmd_identificationInfo > gmd_MD_DataIdentification[id=DataIdentification] > gmd_abstract > gco_CharacterString'}
+                ,{name : 'bboxWest'       ,mapping : 'gmd_identificationInfo > gmd_MD_DataIdentification[id=DataIdentification] > gmd_extent > gmd_EX_Extent > gmd_geographicElement > gmd_EX_GeographicBoundingBox > gmd_westBoundLongitude > gco_Decimal'}
+                ,{name : 'bboxEast'       ,mapping : 'gmd_identificationInfo > gmd_MD_DataIdentification[id=DataIdentification] > gmd_extent > gmd_EX_Extent > gmd_geographicElement > gmd_EX_GeographicBoundingBox > gmd_eastBoundLongitude > gco_Decimal'}
+                ,{name : 'bboxSouth'      ,mapping : 'gmd_identificationInfo > gmd_MD_DataIdentification[id=DataIdentification] > gmd_extent > gmd_EX_Extent > gmd_geographicElement > gmd_EX_GeographicBoundingBox > gmd_southBoundLatitude > gco_Decimal'}
+                ,{name : 'bboxNorth'      ,mapping : 'gmd_identificationInfo > gmd_MD_DataIdentification[id=DataIdentification] > gmd_extent > gmd_EX_Extent > gmd_geographicElement > gmd_EX_GeographicBoundingBox > gmd_northBoundLatitude > gco_Decimal'}
+                ,{name : 'services'       ,convert : (function(){
+                  return function(v,n) {
+                    return new Ext.data.XmlReader({
+                       record : 'gmd_identificationInfo > srv_SV_ServiceIdentification'
+                      ,fields : [
+                         {name : 'type'    ,mapping : 'srv_serviceType > gco_LocalName'}
+                        ,{name : 'url'     ,mapping : 'srv_containsOperations > srv_SV_OperationMetadata > srv_connectPoint > gmd_CI_OnlineResource > gmd_linkage > gmd_URL'}
+                        ,{name : 'keywords',convert : (function(){
+                          return function(v,n) {
+                            return new Ext.data.XmlReader({
+                               record : 'srv_keywords > gmd_MD_Keywords > gmd_keyword'
+                              ,fields : [
+                                {name : 'keyword',mapping : 'gco_CharacterString'}
+                              ]
+                            }).readRecords(n).records;
+                          }
+                        })()}
+                      ]
+                    }).readRecords(n).records;
+                  }
+                })()}
+              ]
+              ,listeners  : {
+                beforeload : function(sto) {
+                  var lyr = map.getLayersByName('queryHits')[0];
+                  if (lyr && lyr.features) {
+                    lyr.removeFeatures(lyr.features);
+                  }
+                  for (var i = 0; i < knownToolTips.length; i++) {
+                    knownToolTips[i].destroy();
+                  }
+                  knownToolTips = [];
+                }
+                ,load      : function(sto) {
+                  var features = [];
+                  sto.each(function(rec) {
+                    var g = {
+                       type        : 'Polygon'
+                      ,coordinates : [[
+                         [rec.get('bboxWest'),rec.get('bboxSouth')]
+                        ,[rec.get('bboxEast'),rec.get('bboxSouth')]
+                        ,[rec.get('bboxEast'),rec.get('bboxNorth')]
+                        ,[rec.get('bboxWest'),rec.get('bboxNorth')]
+                        ,[rec.get('bboxWest'),rec.get('bboxSouth')]
+                      ]]
+                    };
+                    var geojson = new OpenLayers.Format.GeoJSON();
+                    var f       = geojson.read({
+                       type     : 'FeatureCollection'
+                      ,features : [{
+                         type       : 'Feature'
+                        ,geometry   : g
+                        ,properties : {
+                           title   : rec.get('title')
+                          ,summary : rec.get('summary')
+                          ,id      : rec.id
                         }
-                      }
+                      }]
+                    });
+                    f[0].geometry.transform(proj4326,proj900913);
+                    // change geometry from polygon to line
+                    if (f[0].geometry.getArea() == 0) {
+                      f[0].geometry = f[0].geometry.getVertices()[0];
                     }
-                    ,beforeexpandnode : function(node) {
-                      var n = {};
-                      for (var i = 0; i < node.childNodes.length; i++) {
-                        n[node.childNodes[i].id] = true;
-                      }
-                      var lyr = map.getLayersByName('queryHits')[0];
-                      var f   = [];
-                      for (var i = 0; i < lyr.features.length; i++) {
-                        if (n[lyr.features[i].attributes.id]) {
-                          lyr.features[i].attributes.hidden = false;
-                          f.push(lyr.features[i]);
-                        }
-                      }
-                      Ext.defer(function(){lyr.events.triggerEvent('featuresmodified',{features : f})},100);
-                      lyr.redraw();
+                    else {
+                      var vertices = f[0].geometry.getVertices();
+                      vertices.push(vertices[0]);
+                      f[0].geometry = new OpenLayers.Geometry.LineString(vertices);
                     }
-                    ,beforecollapsenode : function(node) {
-                      var n = {};
-                      for (var i = 0; i < node.childNodes.length; i++) {
-                        n[node.childNodes[i].id] = true;
-                      }
-                      var lyr = map.getLayersByName('queryHits')[0];
-                      var f   = [];
-                      for (var i = 0; i < lyr.features.length; i++) {
-                        if (n[lyr.features[i].attributes.id]) {
-                          lyr.features[i].attributes.hidden = true;
-                          f.push(lyr.features[i]);
-                        }
-                      }
-                      lyr.events.triggerEvent('featuresmodified',{features : f});
-                      lyr.redraw();
+                    features.push(f[0]);
+                  });
+                  var lyr = map.getLayersByName('queryHits')[0];
+                  lyr.addFeatures(features);
+                  if (sto.getCount() > 0) {
+                    map.zoomToExtent(lyr.getDataExtent());
+                  }
+                  var countTxt = 'No records fetched.';
+                  if (sto.getCount() == 1) {
+                    countTxt = '1 record fetched.';
+                  }
+                  else {
+                    countTxt = sto.getCount() + ' records fetched.';
+                  }
+                  Ext.getCmp('searchResultsRecordsCounter').setText(countTxt);
+                }
+              }
+              ,sortInfo  : {field : 'title',direction : 'ASC'}
+            })
+            ,columns          : [
+              {renderer : function(val,metadata,rec) {
+                return '<p id="' + rec.id + 'toolTip" class="title"><b><a href="javascript:var foo = findAndZoomToFeatureById(\'' + rec.id + '\')"><img style="margin-bottom:-1px" src="img/zoom.png">' + rec.get('title') + '</a></b></p>' + '<div id="' + rec.id + '"></div>';
+              }}
+            ]
+            ,viewConfig       : {
+               forceFit      : true
+              ,enableRowBody : true
+              ,getRowClass   : function(rec,idx,p,store) {
+                p.body = [
+                  '<p class="summary">' + rec.get('summary') + '</p>'
+                ].join('');
+                return 'x-grid3-row-expanded';
+              }
+              ,onRowOver     : function(e,target) {
+                // sadly, this is not a listener
+                var row = this.findRowIndex(target);
+                if (row !== false) {
+                  this.addRowClass(row,this.rowOverCls);
+                  var lyr = map.getLayersByName('queryHits')[0];
+                  var rec = this.grid.getStore().getAt(row);
+                  for (var i = 0; i < lyr.features.length; i++) {
+                    if (lyr.features[i].attributes.id == rec.id) {
+                      highlightControl.highlight(lyr.features[i]);
+                    }
+                    else {
+                      highlightControl.unhighlight(lyr.features[i]);
                     }
                   }
+                }
+              }
+              ,listeners     : {refresh : function(view) {
+                knownGetCaps = {};
+                Ext.getCmp('queryGridPanel').getSelectionModel().clearSelections();
+                var sto = view.grid.getStore();
+                sto.each(function(rec) {
+                  new Ext.ToolTip({
+                     html   : 'Zoom to ' + rec.get('title')
+                    ,target : rec.id + 'toolTip'
+                  });
+                  var children = [];
+                  var services = rec.get('services');
+                  for (var i = 0; i < services.length; i++) {
+                    var keywords = [];
+                    for (var j = 0; j < services[i].data.keywords.length; j++) {
+                      if (services[i].data.keywords[j].data.keyword != '') {
+                        keywords.push(services[i].data.keywords[j].data.keyword);
+                      }
+                    }
+                    keywords.sort();
+                    children.push({
+                       text : services[i].data.type
+                      ,url  : services[i].data.url
+                      ,qtip : services[i].data.type + (keywords.length > 0 ? ' keywords: ' + keywords.join(', ') : '')
+                      ,leaf : !new RegExp(/service=(sos|wms)/i).test(services[i].data.url)
+                      ,gpId : rec.id
+                    });
+                  }
+                  var tp = new Ext.tree.TreePanel({
+                     renderTo    : rec.id
+                    ,id          : rec.id + 'treePanel'
+                    ,width       : Ext.getCmp('queryGridPanel').getWidth() - 35
+                    ,border      : false
+                    ,rootVisible : false
+                    ,root        : new Ext.tree.AsyncTreeNode({children : [{
+                       text      : 'Services'
+                      ,children  : children
+                      ,qtip      : 'Expand to view available data services'
+                    }]})
+                    ,bodyStyle   : 'background-color:transparent'
+                    ,loader      : new Ext.tree.TreeLoader({
+                      directFn : function(nodeId,callback) {
+                        var node = tp.getNodeById(nodeId);
+                        if (new RegExp(/service=sos/i).test(node.attributes.url)) {
+                          sosGetCaps(node,callback);
+                        }
+                        else if (new RegExp(/service=wms/i).test(node.attributes.url)) {
+                          wmsGetCaps(node,callback);
+                        }
+                      }
+                    })
+                    ,listeners   : {
+                      click : function(node,e) {
+                        goQueryGridPanelRowById(node.attributes.gpId ? node.attributes.gpId : node.parentNode.attributes.gpId,false);
+                        if (node.leaf) {
+                          if (!findAndZoomToFeatureById(node.id)) {
+                            Ext.Msg.alert('Unknown service',"I'm sorry, but I don't know how to process this <a target=_blank href='" + node.attributes.url + "'>" + node.attributes.text + "</a> service.");
+                          }
+                        }
+                      }
+                      ,beforeexpandnode : function(node) {
+                        var n = {};
+                        for (var i = 0; i < node.childNodes.length; i++) {
+                          n[node.childNodes[i].id] = true;
+                        }
+                        var lyr = map.getLayersByName('queryHits')[0];
+                        var f   = [];
+                        for (var i = 0; i < lyr.features.length; i++) {
+                          if (n[lyr.features[i].attributes.id]) {
+                            lyr.features[i].attributes.hidden = false;
+                            f.push(lyr.features[i]);
+                          }
+                        }
+                        Ext.defer(function(){lyr.events.triggerEvent('featuresmodified',{features : f})},100);
+                        lyr.redraw();
+                      }
+                      ,beforecollapsenode : function(node) {
+                        var n = {};
+                        for (var i = 0; i < node.childNodes.length; i++) {
+                          n[node.childNodes[i].id] = true;
+                        }
+                        var lyr = map.getLayersByName('queryHits')[0];
+                        var f   = [];
+                        for (var i = 0; i < lyr.features.length; i++) {
+                          if (n[lyr.features[i].attributes.id]) {
+                            lyr.features[i].attributes.hidden = true;
+                            f.push(lyr.features[i]);
+                          }
+                        }
+                        lyr.events.triggerEvent('featuresmodified',{features : f});
+                        lyr.redraw();
+                      }
+                    }
+                  });
                 });
+              }}
+            }
+            ,hideHeaders      : true
+            ,loadMask         : true
+            ,sm               : new Ext.grid.RowSelectionModel({
+               singleSelect : true
+              ,listeners    : {rowselect : function(sm,idx,rec) {
+                findAndZoomToFeatureById(rec.id);
+              }}
+            })
+            ,bbar       : {items : [
+               '->'
+              ,{
+                 text : 'No records fetched.'
+                ,id   : 'searchResultsRecordsCounter'
+              }
+            ]}
+            ,listeners : {resize : function(gp,w,h) {
+              gp.getStore().each(function(rec) {
+                Ext.getCmp(rec.id + 'treePanel').setWidth(w - 35);
               });
             }}
-          }
-          ,hideHeaders      : true
-          ,loadMask         : true
-          ,sm               : new Ext.grid.RowSelectionModel({
-             singleSelect : true
-            ,listeners    : {rowselect : function(sm,idx,rec) {
-              findAndZoomToFeatureById(rec.id);
-            }}
           })
-          ,bbar       : {items : [
-             '->'
-            ,{
-               text : 'No records fetched.'
-              ,id   : 'searchResultsRecordsCounter'
-            }
-          ]}
-          ,listeners : {resize : function(gp,w,h) {
-            gp.getStore().each(function(rec) {
-              Ext.getCmp(rec.id + 'treePanel').setWidth(w - 35);
-            });
-          }}
-        })
+        ]
       }
     ]
   });

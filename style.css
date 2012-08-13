@@ -120,3 +120,7 @@ div.olControlMousePosition {
   font : 11px/13px tahoma,helvetica,sans-serif;
   color : gray;
 }
+
+#queryGridPanel {
+  border-top: 1px solid #99BBE8;
+}
