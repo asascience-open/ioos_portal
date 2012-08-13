@@ -109,15 +109,33 @@ function init() {
               })
               ,{border : false,cls : 'directions',height : 25,html : '<table><tr><td>Any option below that is left blank will be ignored.</td></tr></table>'}
               ,new Ext.form.DateField({
-                 fieldLabel : 'Show results no older than this date.'
+                 fieldLabel : 'Show results no older than this date:'
                 ,id         : 'searchStartDate'
                 ,width      : 100
               })
               ,new Ext.form.DateField({
-                 fieldLabel : 'Show results no newer than this date.'
+                 fieldLabel : 'Show results no newer than this date:'
                 ,id         : 'searchEndDate'
                 ,width      : 100
               })
+              ,new Ext.form.CheckboxGroup({
+                 fieldLabel : 'Restrict results to these services:'
+                ,columns    : 1
+                ,items      : [
+                   {boxLabel : 'OPeNDAP',name : 'serviceCheckboxOpendap'}
+                  ,{boxLabel : 'SOS'    ,name : 'serviceCheckboxSos'}
+                  ,{boxLabel : 'WMS'    ,name : 'serviceCheckboxWms'}
+                ]
+              })
+              ,{html : '<img src="img/blank.png" height=5>',border : false}
+              ,{layout : 'column',border : false,defaults : {border : false},items : [
+                 {html : '&nbsp;',columnWidth : 0.2}
+                ,new Ext.Button({
+                   columnWidth : 0.6
+                  ,text        : 'Clear advanced search options'
+                })
+                ,{html : '&nbsp;',columnWidth : 0.2}
+              ]}
             ]
             ,listeners   : {afterrender : function(p) {
               p.addListener('expand',function(p) {
