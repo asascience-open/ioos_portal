@@ -111,3 +111,12 @@ div.olControlMousePosition {
 .x-btn-group-header {
   font : 11px/13px tahoma,helvetica,sans-serif;
 }
+
+.directions table {
+  width : 100%;
+}
+.directions td {
+  text-align : center;
+  font : 11px/13px tahoma,helvetica,sans-serif;
+  color : gray;
+}

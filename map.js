@@ -41,95 +41,20 @@ function init() {
 
   new Ext.Viewport({
      layout : 'border'
+    ,id     : 'viewport'
     ,items  : [
       {
-         region    : 'north'
-        ,id        : 'searchControlPanel'
-        ,height    : 50
-        ,layout    : 'column'
-        ,bodyStyle : 'padding : 0px 6px 0px 6px'
-        ,defaults  : {border : false}
-        ,items     : [
-          {
-             columnWidth : 0.50
-            ,html        : '<table width="100%"><tr><td style="padding-bottom:4px;font:12px/13px tahoma,helvetica,sans-serif;color:gray" align=center>Click on one of these super sexy buttons to fire a sample service-oriented query.</td></tr></table>'
-          }
-          ,{
-             columnWidth : 0.10
-            ,html        : '&nbsp;'
-          }
-          ,{
-             columnWidth : 0.40
-            ,html        : '<table width="100%"><tr><td style="padding-bottom:4px;font:12px/13px tahoma,helvetica,sans-serif;color:gray" align=center>Or use free text search below.</td></tr></table>'
-          }
-          ,{
-             columnWidth : 0.50
-            ,layout      : 'column'
-            ,defaults    : {border : false}
-            ,items       : [
-              new Ext.Button({
-                 columnWidth  : 0.30 
-                ,text         : 'WMS'
-                ,toggleGroup  : 'searchGroup'
-                ,allowDepress : false
-                ,handler      : function() {
-                  Ext.getCmp('anyTextSearchField').reset();
-                  var sto = Ext.getCmp('queryGridPanel').getStore();
-                  sto.setBaseParam('xmlData',sampleCSW['WMS']);
-                  sto.load();
-                }
-              })
-              ,{
-                 columnWidth : 0.05
-                ,html        : '&nbsp;'
-              }
-              ,new Ext.Button({
-                 columnWidth  : 0.30
-                ,text         : 'OPeNDAP'
-                ,toggleGroup  : 'searchGroup'
-                ,allowDepress : false
-                ,handler      : function() {
-                  Ext.getCmp('anyTextSearchField').reset();
-                  var sto = Ext.getCmp('queryGridPanel').getStore();
-                  sto.setBaseParam('xmlData',sampleCSW['OPeNDAP']);
-                  sto.load();
-                }
-              })
-              ,{
-                 columnWidth : 0.05
-                ,html        : '&nbsp;'
-              }
-              ,new Ext.Button({
-                 columnWidth  : 0.30
-                ,text         : 'SOS'
-                ,toggleGroup  : 'searchGroup'
-                ,allowDepress : false
-                ,pressed      : true
-                ,handler      : function() {
-                  Ext.getCmp('anyTextSearchField').reset();
-                  var sto = Ext.getCmp('queryGridPanel').getStore();
-                  sto.setBaseParam('xmlData',sampleCSW['SOS']);
-                  sto.load();
-                }
-              })
-              ,new Ext.Button({
-                 columnWidth  : 0.30
-                ,id           : 'anyTextButton'
-                ,hidden       : true
-                ,toggleGroup  : 'searchGroup'
-                ,allowDepress : false
-              })
-            ]
-          }
-          ,{
-             columnWidth : 0.10
-            ,html        : '&nbsp;'
-          }
-          ,new Ext.ux.form.SearchField({
-             columnWidth     : 0.40
-            ,emptyText       : 'Enter a search string (* is a wildcard).'
+         region     : 'north'
+        ,id         : 'searchControlPanel'
+        ,height     : 60
+        ,baseHeight : 60
+        ,bodyStyle  : 'padding : 6px'
+        ,items      : [
+          new Ext.ux.form.SearchField({
+             emptyText       : 'Enter a search string (* is a wildcard).'
             ,id              : 'anyTextSearchField'
             ,paramName       : 'anyText'
+            ,width           : 400
             ,onTrigger1Click : function() {
               if(this.hasSearch){
                   this.reset();
@@ -158,12 +83,54 @@ function init() {
                 this.store.baseParams[this.paramName] = v;
                 this.store.reload({params:o});
               }
+              var sto = Ext.getCmp('queryGridPanel').getStore();
               sto.setBaseParam('xmlData',sampleCSW['AnyText'].replace('___ANYTEXT___',v));
-              Ext.getCmp('anyTextButton').toggle(true);
               sto.load();
               this.hasSearch = true;
               this.triggers[0].show();
             }
+          })
+          ,new Ext.form.FieldSet({
+             title          : '&nbsp;Advanced search options&nbsp;'
+            ,width          : 400
+            ,collapsible    : true
+            ,collapsed      : true
+            ,labelWidth     : 250
+            ,labelSeparator : ''
+            ,items          : [
+              new Ext.form.RadioGroup({
+                 fieldLabel : 'Restrict results to map boundaries?'
+                ,id         : 'searchMapBoundsRadioGroup'
+                ,columns    : [50,40]
+                ,items      : [
+                   {boxLabel : 'Yes',name : 'mapBoundsRadioGroup',id : 'mapBoundsRadioGroupYes'}
+                  ,{boxLabel : 'No' ,name : 'mapBoundsRadioGroup',id : 'mapBoundsRadioGroupNo' ,checked : true}
+                ]
+              })
+              ,{border : false,cls : 'directions',height : 25,html : '<table><tr><td>Any option below that is left blank will be ignored.</td></tr></table>'}
+              ,new Ext.form.DateField({
+                 fieldLabel : 'Show results no older than this date.'
+                ,id         : 'searchStartDate'
+                ,width      : 100
+              })
+              ,new Ext.form.DateField({
+                 fieldLabel : 'Show results no newer than this date.'
+                ,id         : 'searchEndDate'
+                ,width      : 100
+              })
+            ]
+            ,listeners   : {afterrender : function(p) {
+              p.addListener('expand',function(p) {
+                var searchControlPanel = Ext.getCmp('searchControlPanel');
+                searchControlPanel.setHeight(searchControlPanel.baseHeight + p.getHeight() - 20);
+                Ext.getCmp('viewport').doLayout();
+              });
+              p.addListener('collapse',function(p) {
+                var searchControlPanel = Ext.getCmp('searchControlPanel');
+                searchControlPanel.setHeight(searchControlPanel.baseHeight);
+                Ext.getCmp('viewport').doLayout();
+              });
+            }}
           })
         ]
       }
@@ -455,10 +422,6 @@ function init() {
       }
     ]
   });
-
-  var sto = Ext.getCmp('queryGridPanel').getStore();
-  sto.setBaseParam('xmlData',sampleCSW['SOS']);
-  sto.load();
 }
 
 function initMap() {
