@@ -90,26 +90,24 @@ div.olControlMousePosition {
     background-color: transparent;
 }
 
-#mapDirections {
-  position : absolute;
-  top : 0;
-  left : 0;
-  z-index : 1004;
-  width : 100%;
-}
-#mapDirections table {
-  width : 100%;
-  padding : 5 50 0 50;
-}
-#mapDirections .directions { 
-  padding : 4;
-  text-align : center;
-  width : 450px;
-  font-family: Verdana,Arial,Helvetica;
-  font-size: 10px;
-  background-image : url(img/bg.png);
-}
-
 #anyTextSearchField {
   margin-bottom : 2px;
+}
+
+#mapControlsButtonGroup {
+  position : absolute;
+  right    : 3px;
+  top      : 1px;
+  z-index  : 10000;
+}
+
+#mapDirections {
+  position : relative;
+  left     : 30px;
+  top      : 10px;
+  z-index  : 10000;
+}
+
+.x-btn-group-header {
+  font : 11px/13px tahoma,helvetica,sans-serif;
 }

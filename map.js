@@ -6,6 +6,7 @@ var sampleCSW = {
 };
 
 var map;
+var defaultBasemap = 'Google Satellite';
 
 var highlightControl;
 var selectControl;
@@ -174,7 +175,7 @@ function init() {
            border     : false
           ,autoScroll : true
         }
-        ,html      : '<div id="map"><div id="mapDirections"><table><tr><td>&nbsp;</td><td class="directions">Use the panel to the left to locate data on the map.<br>Click on any feature outline below to see more details and to add it to your cart.</td><td>&nbsp;</td></tr></table></div></div>'
+        ,html      : '<div id="map"><div id="mapControlsButtonGroup"></div></div</div>'
         ,listeners : {
           afterrender : function(p) {
             initMap();
@@ -439,14 +440,7 @@ function init() {
             }}
           })
           ,bbar       : {items : [
-             {
-               text    : 'Zoom to include all results'
-              ,icon    : 'img/zoom_extend.png'
-              ,handler : function() {
-                map.zoomToExtent(map.getLayersByName('queryHits')[0].getDataExtent());
-              }
-            }
-            ,'->'
+             '->'
             ,{
                text : 'No records fetched.'
               ,id   : 'searchResultsRecordsCounter'
@@ -472,10 +466,51 @@ function initMap() {
 
   map = new OpenLayers.Map('map',{
     layers              : [
-      new OpenLayers.Layer.Google('Google Satellite',{
-         type              : google.maps.MapTypeId.SATELLITE
-        ,sphericalMercator : true
-        ,wrapDateLine      : false
+      new OpenLayers.Layer.XYZ(
+         'ESRI Ocean'
+        ,'http://services.arcgisonline.com/ArcGIS/rest/services/Ocean_Basemap/MapServer/tile/${z}/${y}/${x}.jpg'
+        ,{
+           sphericalMercator : true
+          ,isBaseLayer       : true
+          ,wrapDateLine      : false
+        }
+      )
+      ,new OpenLayers.Layer.OSM(
+         'OpenStreetMapOlay'
+        ,'http://tile.openstreetmap.org/${z}/${x}/${y}.png'
+        ,{
+           isBaseLayer : false
+          ,visibility  : false
+        }
+      )
+      ,new OpenLayers.Layer.CloudMade('CloudMade',{
+         key     : '9de23856dd4e449e99f298e9ae605a40'
+        ,styleId : 998
+        ,opacity : 0.6
+      })
+      ,new OpenLayers.Layer.OSM(
+         'OpenStreetMap'
+        ,'http://tile.openstreetmap.org/${z}/${x}/${y}.png'
+      )
+      ,new OpenLayers.Layer.Google('Google Satellite',{
+         type          : google.maps.MapTypeId.SATELLITE
+        ,projection    : proj900913
+        ,wrapDateLine  : false
+      })
+      ,new OpenLayers.Layer.Google('Google Hybrid',{
+         type          : google.maps.MapTypeId.HYBRID
+        ,projection    : proj900913
+        ,wrapDateLine  : false
+      })
+      ,new OpenLayers.Layer.Google('Google Map',{
+         type          : google.maps.MapTypeId.MAP
+        ,projection    : proj900913
+        ,wrapDateLine  : false
+      })
+      ,new OpenLayers.Layer.Google('Google Terrain',{
+         type          : google.maps.MapTypeId.TERRAIN
+        ,projection    : proj900913
+        ,wrapDateLine  : false
       })
       ,new OpenLayers.Layer.Vector('queryHits',{
          rendererOptions : {zIndexing : true}
@@ -517,6 +552,12 @@ function initMap() {
     ]
     ,displayProjection : proj4326
   });
+
+  map.events.register('moveend',this,function() {
+    map.getLayersByName('OpenStreetMapOlay')[0].setVisibility(map.baseLayer.name == 'ESRI Ocean' && map.getZoom() >= 11);
+  });
+
+  map.setBaseLayer(map.getLayersByName(defaultBasemap)[0]);
   var initBounds = new OpenLayers.Bounds();
   initBounds.extend(new OpenLayers.LonLat(-245.5468750000121,-88.25704028272001).transform(proj4326,proj900913));
   initBounds.extend(new OpenLayers.LonLat(224.1406249999924,88.9309349605731).transform(proj4326,proj900913));
@@ -680,6 +721,108 @@ function initMap() {
 
   var mouseControl = new OpenLayers.Control.MousePosition();
   map.addControl(mouseControl);
+
+  new Ext.ButtonGroup({
+     renderTo  : 'mapControlsButtonGroup'
+    ,autoWidth : true
+    ,columns   : 3
+    ,title     : 'Map controls'
+    ,items     : [
+      new Ext.Button({
+         text     : '<table><tr><td style="font:11px arial,tahoma,verdana,helvetica;text-align:center">Zoom&nbsp;to<br>all&nbsp;results</td></tr></table>'
+        ,width    : 120
+        ,scale    : 'large'
+        ,icon     : 'img/zoom_extend.png'
+        ,handler  : function() {
+          map.zoomToExtent(map.getLayersByName('queryHits')[0].getDataExtent());
+        }
+      })
+      ,{xtype : 'container',autoEl : {tag : 'center'},items : {border : false, html : '<img src="img/blank.png" width=2>'}}
+      ,new Ext.Button({
+         text     : '<table><tr><td style="font:11px arial,tahoma,verdana,helvetica;text-align:center">Change&nbsp;map<br>background</td></tr></table>'
+        ,scale    : 'large'
+        ,width    : 120
+        ,icon     : 'img/map.png'
+        ,menu     : {items : [
+          {
+             text         : 'CloudMade'
+            ,checked      : defaultBasemap == 'CloudMade'
+            ,group        : 'basemap'
+            ,handler      : function() {
+              var lyr = map.getLayersByName('CloudMade')[0];
+              if (lyr.isBaseLayer) {
+                map.setBaseLayer(lyr);
+                lyr.redraw();
+              }
+            }
+          }
+          ,'-'
+          ,{
+             text         : 'ESRI Ocean'
+            ,checked      : defaultBasemap == 'ESRI Ocean'
+            ,group        : 'basemap'
+            ,handler      : function() {
+              var lyr = map.getLayersByName('ESRI Ocean')[0];
+              if (lyr.isBaseLayer) {
+                map.setBaseLayer(lyr);
+                lyr.redraw();
+              }
+            }
+          }
+          ,'-'
+          ,{
+             text         : 'Google Hybrid'
+            ,checked      : defaultBasemap == 'Google Hybrid'
+            ,group        : 'basemap'
+            ,handler      : function() {
+              var lyr = map.getLayersByName('Google Hybrid')[0];
+              if (lyr.isBaseLayer) {
+                map.setBaseLayer(lyr);
+                lyr.redraw();
+              }
+            }
+          }
+          ,{
+             text         : 'Google Satellite'
+            ,checked      : defaultBasemap == 'Google Satellite'
+            ,group        : 'basemap'
+            ,handler      : function() {
+              var lyr = map.getLayersByName('Google Satellite')[0];
+              if (lyr.isBaseLayer) {
+                map.setBaseLayer(lyr);
+                lyr.redraw();
+              }
+            }
+          }
+          ,{
+             text         : 'Google Terrain'
+            ,checked      : defaultBasemap == 'Google Terrain'
+            ,group        : 'basemap'
+            ,handler      : function() {
+              var lyr = map.getLayersByName('Google Terrain')[0];
+              if (lyr.isBaseLayer) {
+                map.setBaseLayer(lyr);
+                lyr.redraw();
+              }
+            }
+          }
+          ,'-'
+          ,{
+             text         : 'OpenStreetMap'
+            ,checked      : defaultBasemap == 'OpenStreetMap'
+            ,group        : 'basemap'
+            ,handler      : function() {
+              var lyr = map.getLayersByName('OpenStreetMap')[0];
+              if (lyr.isBaseLayer) {
+                map.setBaseLayer(lyr);
+                lyr.redraw();
+              }
+            }
+          }
+        ]}
+      })
+    ]
+  });
 
 /*
   new Ext.Window({
