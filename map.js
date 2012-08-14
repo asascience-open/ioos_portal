@@ -148,6 +148,10 @@ function init() {
                   ]
                   ,listeners  : {change : function(rg,radio) {
                     if (radio.id == 'bboxRadioGroupYes') {
+                      if (!rg.alerted) {
+                        Ext.Msg.alert('Custom boundaries','After closing this dialog, draw your custom bounding box on the map.  If you are not satisfied with your bounding box, click the redraw link to start over.  To completely clear your bounding box, select the "No" option.  This dialog will not appear again.');
+                      }
+                      rg.alerted = true;
                       drawBbox();
                     }
                     else {
@@ -339,7 +343,16 @@ function init() {
                   var lyr = map.getLayersByName('queryHits')[0];
                   lyr.addFeatures(features);
                   if (sto.getCount() > 0) {
-                    map.zoomToExtent(lyr.getDataExtent());
+                    if (bboxControl.layer.features.length > 0) {
+                      Ext.MessageBox.confirm('Warning','Since you have created custom boundaries, would you like to allow the map to reset the zoom to include the full boundaries of the data results (which may be larger than your custom boundaries)?',function(but) {
+                        if (but == 'yes') {
+                          map.zoomToExtent(lyr.getDataExtent());
+                        }
+                      });
+                    }
+                    else {
+                      map.zoomToExtent(lyr.getDataExtent());
+                    }
                   }
                   else {
                     Ext.getCmp('queryGridPanel').body.applyStyles({
@@ -1109,6 +1122,7 @@ function resetAdvancedSearchOptions() {
 }
 
 function drawBbox() {
+  Ext.getCmp('bboxRadioGroupYes').setValue(true);
   bboxControl.layer.removeFeatures(bboxControl.layer.features);
   bboxControl.activate();
 }
