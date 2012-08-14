@@ -194,7 +194,7 @@ function init() {
                 });
                 p.addListener('beforecollapse',function(p) {
                   if (!p.forceCollapse) {
-                    Ext.MessageBox.confirm('Confirm','The advanced search options will be cleared.  Are you sure you wish to continue?',function(button) {
+                    Ext.MessageBox.confirm('Confirm','By hiding these options, any changes to the advanced search will be lost.  Are you sure you wish to continue?',function(button) {
                       if (button == 'yes') {
                         p.forceCollapse = true;
                         p.collapse();
