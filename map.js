@@ -1,4 +1,6 @@
-var cswPost = '<?xml version="1.0"?> <csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" version="2.0.2" service="CSW" resultType="results" outputSchema="http://www.isotc211.org/2005/gmd" startPosition="1" maxRecords="1000"> <csw:Query xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml" typeNames="csw:Record"> <csw:ElementSetName>full</csw:ElementSetName> <csw:Constraint version="1.1.0">     <ogc:Filter>         <ogc:And>             <ogc:BBOX>                 <ogc:PropertyName>ows:BoundingBox</ogc:PropertyName>                 <gml:Envelope>                     <gml:lowerCorner>___MINLON___ ___MINLAT___</gml:lowerCorner>                     <gml:upperCorner>___MAXLON___ ___MAXLAT___</gml:upperCorner>                 </gml:Envelope>             </ogc:BBOX>             <ogc:And>                 <ogc:Or>                     <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">                         <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>                         <ogc:Literal>___OPENDAP___</ogc:Literal>                     </ogc:PropertyIsLike>                     <ogc:Or>                         <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">                             <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>                             <ogc:Literal>___SOS___</ogc:Literal>                         </ogc:PropertyIsLike>                         <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">                             <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>                             <ogc:Literal>___WMS___</ogc:Literal>                         </ogc:PropertyIsLike>                     </ogc:Or>                 </ogc:Or>                 <ogc:And>                     <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">                         <ogc:PropertyName>AnyText</ogc:PropertyName>                         <ogc:Literal>___ANYTEXT___</ogc:Literal>                     </ogc:PropertyIsLike>                     <ogc:PropertyIsEqualTo>                         <ogc:PropertyName>sys.siteuuid</ogc:PropertyName>                         <ogc:Literal>{E4949969-468A-4B10-823D-9BF1BF0785B2}</ogc:Literal>                     </ogc:PropertyIsEqualTo>                 </ogc:And>             </ogc:And>         </ogc:And>     </ogc:Filter> </csw:Constraint> </csw:Query> </csw:GetRecords>';
+var cswPost = '<?xml version="1.0"?> <csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" version="2.0.2" service="CSW" resultType="results" outputSchema="http://www.isotc211.org/2005/gmd" startPosition="1" maxRecords="1000"> <csw:Query xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml" typeNames="csw:Record"> <csw:ElementSetName>full</csw:ElementSetName> <csw:Constraint version="1.1.0">     <ogc:Filter>         <ogc:And>             <ogc:And>                 <ogc:PropertyIsGreaterThan>                     <ogc:PropertyName>apiso:modified</ogc:PropertyName>                     <ogc:Literal>___STARTDATE___</ogc:Literal>                 </ogc:PropertyIsGreaterThan>                 <ogc:PropertyIsLessThan>                     <ogc:PropertyName>apiso:modified</ogc:PropertyName>                     <ogc:Literal>___ENDDATE___</ogc:Literal>                 </ogc:PropertyIsLessThan>             </ogc:And>             <ogc:And>                 <ogc:BBOX>                     <ogc:PropertyName>ows:BoundingBox</ogc:PropertyName>                     <gml:Envelope>                         <gml:lowerCorner>___MINLON___ ___MINLAT___</gml:lowerCorner>                         <gml:upperCorner>___MAXLON___ ___MAXLAT___</gml:upperCorner>                     </gml:Envelope>                 </ogc:BBOX>                 <ogc:And>                     <ogc:Or>                         <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">                             <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>                             <ogc:Literal>___OPENDAP___</ogc:Literal>                         </ogc:PropertyIsLike>                         <ogc:Or>                             <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">                                 <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>                                 <ogc:Literal>___SOS___</ogc:Literal>                             </ogc:PropertyIsLike>                             <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">                                 <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>                                 <ogc:Literal>___WMS___</ogc:Literal>                             </ogc:PropertyIsLike>                         </ogc:Or>                     </ogc:Or>                     <ogc:And>                         <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">                             <ogc:PropertyName>AnyText</ogc:PropertyName>                             <ogc:Literal>___ANYTEXT___</ogc:Literal>                         </ogc:PropertyIsLike>                         <ogc:PropertyIsEqualTo>                             <ogc:PropertyName>sys.siteuuid</ogc:PropertyName>                             <ogc:Literal>{E4949969-468A-4B10-823D-9BF1BF0785B2}</ogc:Literal>                         </ogc:PropertyIsEqualTo>                     </ogc:And>                 </ogc:And>             </ogc:And>         </ogc:And>     </ogc:Filter> </csw:Constraint> </csw:Query> </csw:GetRecords>';
+// no dates
+cswPost = '<?xml version="1.0"?> <csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" version="2.0.2" service="CSW" resultType="results" outputSchema="http://www.isotc211.org/2005/gmd" startPosition="1" maxRecords="1000"> <csw:Query xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml" typeNames="csw:Record"> <csw:ElementSetName>full</csw:ElementSetName> <csw:Constraint version="1.1.0">     <ogc:Filter>         <ogc:And>             <ogc:BBOX>                 <ogc:PropertyName>ows:BoundingBox</ogc:PropertyName>                 <gml:Envelope>                     <gml:lowerCorner>___MINLON___ ___MINLAT___</gml:lowerCorner>                     <gml:upperCorner>___MAXLON___ ___MAXLAT___</gml:upperCorner>                 </gml:Envelope>             </ogc:BBOX>             <ogc:And>                 <ogc:Or>                     <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">                         <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>                         <ogc:Literal>___OPENDAP___</ogc:Literal>                     </ogc:PropertyIsLike>                     <ogc:Or>                         <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">                             <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>                             <ogc:Literal>___SOS___</ogc:Literal>                         </ogc:PropertyIsLike>                         <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">                             <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>                             <ogc:Literal>___WMS___</ogc:Literal>                         </ogc:PropertyIsLike>                     </ogc:Or>                 </ogc:Or>                 <ogc:And>                     <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">                         <ogc:PropertyName>AnyText</ogc:PropertyName>                         <ogc:Literal>___ANYTEXT___</ogc:Literal>                     </ogc:PropertyIsLike>                     <ogc:PropertyIsEqualTo>                         <ogc:PropertyName>sys.siteuuid</ogc:PropertyName>                         <ogc:Literal>{E4949969-468A-4B10-823D-9BF1BF0785B2}</ogc:Literal>                     </ogc:PropertyIsEqualTo>                 </ogc:And>             </ogc:And>         </ogc:And>     </ogc:Filter> </csw:Constraint> </csw:Query> </csw:GetRecords>';
 
 var map;
 var defaultBasemap = 'Google Satellite';
@@ -163,14 +165,14 @@ function init() {
                 ,{border : false,cls : 'directions',height : 25,html : '<table><tr><td>Any option below that is left blank will be ignored.</td></tr></table>'}
                 ,new Ext.form.DateField({
                    fieldLabel : 'Show results no older than this date:'
-                  ,disabled   : true
                   ,id         : 'searchStartDate'
+                  ,disabled   : true
                   ,width      : 100
                 })
                 ,new Ext.form.DateField({
                    fieldLabel : 'Show results no newer than this date:'
-                  ,disabled   : true
                   ,id         : 'searchEndDate'
+                  ,disabled   : true
                   ,width      : 100
                 })
                 ,new Ext.form.CheckboxGroup({
@@ -281,9 +283,20 @@ function init() {
                     'border-top' : '1px solid #99BBE8'
                   });
                   var p = cswPost;
+                  var d = '1900-01-01';
+                  if (Ext.getCmp('searchStartDate').getValue()) {
+                    d = makeTimeParam(Ext.getCmp('searchStartDate').getValue());
+                  }
+                  p = p.replace('___STARTDATE___',d);
+                  d = '2999-01-01';
+                  if (Ext.getCmp('searchStartDate').getValue()) {
+                    d = makeTimeParam(Ext.getCmp('searchStartDate').getValue());
+                  }
+                  p = p.replace('___ENDDATE___',d);
                   var bbox = [-9999999,-9999999,9999999,9999999];
                   if (bboxControl.layer.features.length > 0) {
-                    bbox = bboxControl.layer.features[0].geometry.getBounds().transform(proj900913,proj4326).toArray();
+                    var f = bboxControl.layer.features[0].clone();
+                    bbox  = f.geometry.getBounds().transform(proj900913,proj4326).toArray();
                   }
                   p = p.replace('___MINLON___',bbox[0]);
                   p = p.replace('___MINLAT___',bbox[1]);
@@ -1125,4 +1138,8 @@ function drawBbox() {
   Ext.getCmp('bboxRadioGroupYes').setValue(true);
   bboxControl.layer.removeFeatures(bboxControl.layer.features);
   bboxControl.activate();
+}
+
+function makeTimeParam(d) {
+  return d.getUTCFullYear() + '-' + String.leftPad(d.getUTCMonth() + 1,2,'0') + '-' + String.leftPad(d.getUTCDate(),2,'0');
 }
