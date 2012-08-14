@@ -268,9 +268,16 @@ function init() {
                   });
                   var p = cswPost;
                   p = p.replace('___ANYTEXT___',Ext.getCmp('anyTextSearchField').getValue() != '' ? Ext.getCmp('anyTextSearchField').getValue() : '*');
-                  p = p.replace('___SOS___',Ext.getCmp('serviceCheckboxSos').getValue() ? '*sos*' : 'foo');
-                  p = p.replace('___WMS___',Ext.getCmp('serviceCheckboxWms').getValue() ? '*wms*' : 'foo');
-                  p = p.replace('___OPENDAP___',Ext.getCmp('serviceCheckboxOpendap').getValue() ? '*opendap*' : 'foo');
+                  if (!Ext.getCmp('serviceCheckboxSos').getValue() && !Ext.getCmp('serviceCheckboxWms').getValue() && !Ext.getCmp('serviceCheckboxOpendap').getValue()) {
+                    p = p.replace('___SOS___','*');
+                    p = p.replace('___WMS___','*');
+                    p = p.replace('___OPENDAP___','*');
+                  }
+                  else {
+                    p = p.replace('___SOS___',Ext.getCmp('serviceCheckboxSos').getValue() ? '*sos*' : 'foo');
+                    p = p.replace('___WMS___',Ext.getCmp('serviceCheckboxWms').getValue() ? '*wms*' : 'foo');
+                    p = p.replace('___OPENDAP___',Ext.getCmp('serviceCheckboxOpendap').getValue() ? '*opendap*' : 'foo');
+                  }
                   sto.setBaseParam('xmlData',p);
                 }
                 ,load      : function(sto) {
@@ -419,7 +426,12 @@ function init() {
                         goQueryGridPanelRowById(node.attributes.gpId ? node.attributes.gpId : node.parentNode.attributes.gpId,false);
                         if (node.leaf) {
                           if (!findAndZoomToFeatureById(node.id)) {
-                            Ext.Msg.alert('Unknown service',"I'm sorry, but I don't know how to process this <a target=_blank href='" + node.attributes.url + "'>" + node.attributes.text + "</a> service.");
+                            if (new RegExp(/^http:\/\//).test(node.attributes.url)) {
+                              Ext.Msg.alert('Unknown service',"I'm sorry, but I don't know how to process this <a target=_blank href='" + node.attributes.url + "'>" + node.attributes.text + "</a> service.");
+                            }
+                            else {
+                              Ext.Msg.alert('Unknown service',"I'm sorry, but I don't know how to process this " + node.attributes.text + " service.");
+                            }
                           }
                         }
                       }
