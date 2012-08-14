@@ -46,7 +46,7 @@ function init() {
       {
          region    : 'center'
         ,layout    : 'fit'
-        ,split     : true
+        // ,split     : true
         ,defaults  : {
            border     : false
           ,autoScroll : true
@@ -72,7 +72,7 @@ function init() {
         ,width    : 400
         ,minWidth : 200
         ,layout   : 'anchor'
-        ,split    : true
+        // ,split    : true
         ,defaults : {
           autoScroll : false
          ,border     : false
@@ -164,9 +164,9 @@ function init() {
                    fieldLabel : 'Restrict results to these services:'
                   ,columns    : 1
                   ,items      : [
-                     {boxLabel : 'OPeNDAP',name : 'serviceCheckboxOpendap'}
-                    ,{boxLabel : 'SOS'    ,name : 'serviceCheckboxSos'}
-                    ,{boxLabel : 'WMS'    ,name : 'serviceCheckboxWms'}
+                     {boxLabel : 'OPeNDAP',id : 'serviceCheckboxOpendap'}
+                    ,{boxLabel : 'SOS'    ,id : 'serviceCheckboxSos'}
+                    ,{boxLabel : 'WMS'    ,id : 'serviceCheckboxWms'}
                   ]
                 })
                 ,{html : '<img src="img/blank.png" height=5>',border : false}
@@ -175,6 +175,9 @@ function init() {
                   ,new Ext.Button({
                      columnWidth : 0.6
                     ,text        : 'Clear advanced search options'
+                    ,handler     : function() {
+                      resetAdvancedSearchOptions();
+                    }
                   })
                   ,{html : '&nbsp;',columnWidth : 0.2}
                 ]}
@@ -189,7 +192,19 @@ function init() {
                   queryGridPanel.anchor = '100% -' + searchPanel.getHeight();
                   Ext.getCmp('searchResultsPanel').doLayout();
                 });
+                p.addListener('beforecollapse',function(p) {
+                  if (!p.forceCollapse) {
+                    Ext.MessageBox.confirm('Confirm','The advanced search options will be cleared.  Are you sure you wish to continue?',function(button) {
+                      if (button == 'yes') {
+                        p.forceCollapse = true;
+                        p.collapse();
+                      }
+                    });
+                    return false;
+                  }
+                });
                 p.addListener('collapse',function(p) {
+                  resetAdvancedSearchOptions();
                   var searchPanel = Ext.getCmp('searchPanel');
                   searchPanel.setHeight(searchPanel.baseHeight);
                   searchPanel.doLayout();
@@ -1018,4 +1033,13 @@ function findAndZoomToFeatureById(id) {
     }
   }
   return found;
+}
+
+function resetAdvancedSearchOptions() {
+  Ext.getCmp('searchMapBoundsRadioGroup').reset();
+  Ext.getCmp('searchStartDate').reset();
+  Ext.getCmp('searchEndDate').reset();
+  Ext.getCmp('serviceCheckboxOpendap').reset();
+  Ext.getCmp('serviceCheckboxSos').reset();
+  Ext.getCmp('serviceCheckboxWms').reset();
 }
