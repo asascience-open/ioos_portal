@@ -1,9 +1,4 @@
-var sampleCSW = {
-   'SOS' : '<?xml version="1.0"?>  <csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" version="2.0.2" service="CSW" resultType="results" outputSchema="http://www.isotc211.org/2005/gmd" startPosition="1" maxRecords="1000">   <csw:Query typeNames="csw:Record" xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml">   <csw:ElementSetName>full</csw:ElementSetName>    <csw:Constraint version="1.1.0">   <ogc:Filter>     <ogc:And>       <ogc:PropertyIsEqualTo>         <ogc:PropertyName>sys.siteuuid</ogc:PropertyName>         <ogc:Literal>{E4949969-468A-4B10-823D-9BF1BF0785B2}</ogc:Literal>       </ogc:PropertyIsEqualTo>       <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">          <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>         <ogc:Literal>*sos*</ogc:Literal>       </ogc:PropertyIsLike>     </ogc:And>    </ogc:Filter>  </csw:Constraint>  </csw:Query> </csw:GetRecords>'
-  ,'OPeNDAP' : '<?xml version="1.0"?>  <csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" version="2.0.2" service="CSW" resultType="results" outputSchema="http://www.isotc211.org/2005/gmd" startPosition="1" maxRecords="1000">   <csw:Query typeNames="csw:Record" xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml">   <csw:ElementSetName>full</csw:ElementSetName>    <csw:Constraint version="1.1.0">   <ogc:Filter>     <ogc:And>       <ogc:PropertyIsEqualTo>         <ogc:PropertyName>sys.siteuuid</ogc:PropertyName>         <ogc:Literal>{E4949969-468A-4B10-823D-9BF1BF0785B2}</ogc:Literal>       </ogc:PropertyIsEqualTo>       <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">          <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>         <ogc:Literal>*opendap*</ogc:Literal>       </ogc:PropertyIsLike>     </ogc:And>    </ogc:Filter>  </csw:Constraint>  </csw:Query> </csw:GetRecords>'
-  ,'WMS' : '<?xml version="1.0"?>  <csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" version="2.0.2" service="CSW" resultType="results"  outputSchema="http://www.isotc211.org/2005/gmd" startPosition="1" maxRecords="1000">   <csw:Query typeNames="csw:Record" xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml">   <csw:ElementSetName>full</csw:ElementSetName>    <csw:Constraint version="1.1.0">   <ogc:Filter>     <ogc:And>       <ogc:PropertyIsEqualTo>         <ogc:PropertyName>sys.siteuuid</ogc:PropertyName>         <ogc:Literal>{E4949969-468A-4B10-823D-9BF1BF0785B2}</ogc:Literal>       </ogc:PropertyIsEqualTo>       <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">          <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>         <ogc:Literal>*wms*</ogc:Literal>       </ogc:PropertyIsLike>     </ogc:And>    </ogc:Filter>  </csw:Constraint>  </csw:Query> </csw:GetRecords>'
-  ,'AnyText' : '<?xml version="1.0"?>  <csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" version="2.0.2" service="CSW" resultType="results" outputSchema="http://www.isotc211.org/2005/gmd" startPosition="1" maxRecords="1000">   <csw:Query typeNames="csw:Record" xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml">   <csw:ElementSetName>full</csw:ElementSetName>    <csw:Constraint version="1.1.0">   <ogc:Filter>     <ogc:And>       <ogc:PropertyIsEqualTo>         <ogc:PropertyName>sys.siteuuid</ogc:PropertyName>         <ogc:Literal>{E4949969-468A-4B10-823D-9BF1BF0785B2}</ogc:Literal>       </ogc:PropertyIsEqualTo>       <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">          <ogc:PropertyName>AnyText</ogc:PropertyName>         <ogc:Literal>___ANYTEXT___</ogc:Literal>       </ogc:PropertyIsLike>     </ogc:And>    </ogc:Filter>  </csw:Constraint>  </csw:Query> </csw:GetRecords>'
-};
+var cswPost = '<?xml version="1.0"?> <csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" version="2.0.2" service="CSW" resultType="results" outputSchema="http://www.isotc211.org/2005/gmd" startPosition="1" maxRecords="1000">      <csw:Query typeNames="csw:Record" xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml">     <csw:ElementSetName>full</csw:ElementSetName>     <csw:Constraint version="1.1.0">       <ogc:Filter>         <ogc:And>           <ogc:Or>             <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">               <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>               <ogc:Literal>___OPENDAP___</ogc:Literal>             </ogc:PropertyIsLike>             <ogc:Or>               <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">                 <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>                 <ogc:Literal>___SOS___</ogc:Literal>               </ogc:PropertyIsLike>               <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">                 <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>                 <ogc:Literal>___WMS___</ogc:Literal>               </ogc:PropertyIsLike>             </ogc:Or>           </ogc:Or>           <ogc:And>             <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">               <ogc:PropertyName>AnyText</ogc:PropertyName>               <ogc:Literal>___ANYTEXT___</ogc:Literal>             </ogc:PropertyIsLike>             <ogc:PropertyIsEqualTo>               <ogc:PropertyName>sys.siteuuid</ogc:PropertyName>               <ogc:Literal>{E4949969-468A-4B10-823D-9BF1BF0785B2}</ogc:Literal>             </ogc:PropertyIsEqualTo>           </ogc:And>         </ogc:And>       </ogc:Filter>     </csw:Constraint>   </csw:Query> </csw:GetRecords>';
 
 var map;
 var defaultBasemap = 'Google Satellite';
@@ -118,9 +113,7 @@ function init() {
                       this.store.baseParams[this.paramName] = v;
                       this.store.reload({params:o});
                     }
-                    var sto = Ext.getCmp('queryGridPanel').getStore();
-                    sto.setBaseParam('xmlData',sampleCSW['AnyText'].replace('___ANYTEXT___',v));
-                    sto.load();
+                    Ext.getCmp('queryGridPanel').getStore().load();
                     this.hasSearch = true;
                     this.triggers[0].show();
                   }
@@ -128,7 +121,10 @@ function init() {
                 ,{html : '&nbsp;',columnWidth : 0.05}
                 ,new Ext.Button({
                    columnWidth : 0.15
-                  ,text : 'Go!'
+                  ,text        : 'Go!'
+                  ,handler     : function() {
+                    Ext.getCmp('queryGridPanel').getStore().load();
+                  }
                 })
               ]
             }
@@ -142,6 +138,7 @@ function init() {
               ,items          : [
                 new Ext.form.RadioGroup({
                    fieldLabel : 'Restrict results to map boundaries?'
+                  ,disabled   : true
                   ,id         : 'searchMapBoundsRadioGroup'
                   ,columns    : [50,40]
                   ,items      : [
@@ -152,11 +149,13 @@ function init() {
                 ,{border : false,cls : 'directions',height : 25,html : '<table><tr><td>Any option below that is left blank will be ignored.</td></tr></table>'}
                 ,new Ext.form.DateField({
                    fieldLabel : 'Show results no older than this date:'
+                  ,disabled   : true
                   ,id         : 'searchStartDate'
                   ,width      : 100
                 })
                 ,new Ext.form.DateField({
                    fieldLabel : 'Show results no newer than this date:'
+                  ,disabled   : true
                   ,id         : 'searchEndDate'
                   ,width      : 100
                 })
@@ -267,6 +266,12 @@ function init() {
                   Ext.getCmp('queryGridPanel').body.applyStyles({
                     'border-top' : '1px solid #99BBE8'
                   });
+                  var p = cswPost;
+                  p = p.replace('___ANYTEXT___',Ext.getCmp('anyTextSearchField').getValue() != '' ? Ext.getCmp('anyTextSearchField').getValue() : '*');
+                  p = p.replace('___SOS___',Ext.getCmp('serviceCheckboxSos').getValue() ? '*sos*' : 'foo');
+                  p = p.replace('___WMS___',Ext.getCmp('serviceCheckboxWms').getValue() ? '*wms*' : 'foo');
+                  p = p.replace('___OPENDAP___',Ext.getCmp('serviceCheckboxOpendap').getValue() ? '*opendap*' : 'foo');
+                  sto.setBaseParam('xmlData',p);
                 }
                 ,load      : function(sto) {
                   var features = [];
