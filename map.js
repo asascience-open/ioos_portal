@@ -1,10 +1,11 @@
-var cswPost = '<?xml version="1.0"?> <csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" version="2.0.2" service="CSW" resultType="results" outputSchema="http://www.isotc211.org/2005/gmd" startPosition="1" maxRecords="1000">      <csw:Query typeNames="csw:Record" xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml">     <csw:ElementSetName>full</csw:ElementSetName>     <csw:Constraint version="1.1.0">       <ogc:Filter>         <ogc:And>           <ogc:Or>             <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">               <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>               <ogc:Literal>___OPENDAP___</ogc:Literal>             </ogc:PropertyIsLike>             <ogc:Or>               <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">                 <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>                 <ogc:Literal>___SOS___</ogc:Literal>               </ogc:PropertyIsLike>               <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">                 <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>                 <ogc:Literal>___WMS___</ogc:Literal>               </ogc:PropertyIsLike>             </ogc:Or>           </ogc:Or>           <ogc:And>             <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">               <ogc:PropertyName>AnyText</ogc:PropertyName>               <ogc:Literal>___ANYTEXT___</ogc:Literal>             </ogc:PropertyIsLike>             <ogc:PropertyIsEqualTo>               <ogc:PropertyName>sys.siteuuid</ogc:PropertyName>               <ogc:Literal>{E4949969-468A-4B10-823D-9BF1BF0785B2}</ogc:Literal>             </ogc:PropertyIsEqualTo>           </ogc:And>         </ogc:And>       </ogc:Filter>     </csw:Constraint>   </csw:Query> </csw:GetRecords>';
+var cswPost = '<?xml version="1.0"?> <csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" version="2.0.2" service="CSW" resultType="results" outputSchema="http://www.isotc211.org/2005/gmd" startPosition="1" maxRecords="1000"> <csw:Query xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml" typeNames="csw:Record"> <csw:ElementSetName>full</csw:ElementSetName> <csw:Constraint version="1.1.0">     <ogc:Filter>         <ogc:And>             <ogc:BBOX>                 <ogc:PropertyName>ows:BoundingBox</ogc:PropertyName>                 <gml:Envelope>                     <gml:lowerCorner>___MINLON___ ___MINLAT___</gml:lowerCorner>                     <gml:upperCorner>___MAXLON___ ___MAXLAT___</gml:upperCorner>                 </gml:Envelope>             </ogc:BBOX>             <ogc:And>                 <ogc:Or>                     <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">                         <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>                         <ogc:Literal>___OPENDAP___</ogc:Literal>                     </ogc:PropertyIsLike>                     <ogc:Or>                         <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">                             <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>                             <ogc:Literal>___SOS___</ogc:Literal>                         </ogc:PropertyIsLike>                         <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">                             <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>                             <ogc:Literal>___WMS___</ogc:Literal>                         </ogc:PropertyIsLike>                     </ogc:Or>                 </ogc:Or>                 <ogc:And>                     <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">                         <ogc:PropertyName>AnyText</ogc:PropertyName>                         <ogc:Literal>___ANYTEXT___</ogc:Literal>                     </ogc:PropertyIsLike>                     <ogc:PropertyIsEqualTo>                         <ogc:PropertyName>sys.siteuuid</ogc:PropertyName>                         <ogc:Literal>{E4949969-468A-4B10-823D-9BF1BF0785B2}</ogc:Literal>                     </ogc:PropertyIsEqualTo>                 </ogc:And>             </ogc:And>         </ogc:And>     </ogc:Filter> </csw:Constraint> </csw:Query> </csw:GetRecords>';
 
 var map;
 var defaultBasemap = 'Google Satellite';
 
 var highlightControl;
 var selectControl;
+var bboxControl;
 var toolTipQueue  = [];
 var knownToolTips = [];
 var knownGetCaps  = {};
@@ -134,18 +135,26 @@ function init() {
                title          : '&nbsp;Advanced search options&nbsp;'
               ,collapsible    : true
               ,collapsed      : true
-              ,labelWidth     : 250
+              ,labelWidth     : 230
               ,labelSeparator : ''
               ,items          : [
                 new Ext.form.RadioGroup({
-                   fieldLabel : 'Restrict results to map boundaries?'
-                  ,disabled   : true
-                  ,id         : 'searchMapBoundsRadioGroup'
-                  ,columns    : [50,40]
+                   fieldLabel : 'Restrict results to custom boundaries?'
+                  ,id         : 'searchBboxRadioGroup'
+                  ,columns    : 1
                   ,items      : [
-                     {boxLabel : 'Yes',name : 'mapBoundsRadioGroup',id : 'mapBoundsRadioGroupYes'}
-                    ,{boxLabel : 'No' ,name : 'mapBoundsRadioGroup',id : 'mapBoundsRadioGroupNo' ,checked : true}
+                     {boxLabel : 'Yes&nbsp;&nbsp;[<a href="javascript:drawBbox()">redraw</a>]',name : 'bboxRadioGroup',id : 'bboxRadioGroupYes'}
+                    ,{boxLabel : 'No' ,name : 'bboxRadioGroup',id : 'bboxRadioGroupNo' ,checked : true}
                   ]
+                  ,listeners  : {change : function(rg,radio) {
+                    if (radio.id == 'bboxRadioGroupYes') {
+                      drawBbox();
+                    }
+                    else {
+                      bboxControl.layer.removeFeatures(bboxControl.layer.features);
+                      bboxControl.deactivate();
+                    }
+                  }}
                 })
                 ,{border : false,cls : 'directions',height : 25,html : '<table><tr><td>Any option below that is left blank will be ignored.</td></tr></table>'}
                 ,new Ext.form.DateField({
@@ -268,6 +277,14 @@ function init() {
                     'border-top' : '1px solid #99BBE8'
                   });
                   var p = cswPost;
+                  var bbox = [-9999999,-9999999,9999999,9999999];
+                  if (bboxControl.layer.features.length > 0) {
+                    bbox = bboxControl.layer.features[0].geometry.getBounds().transform(proj900913,proj4326).toArray();
+                  }
+                  p = p.replace('___MINLON___',bbox[0]);
+                  p = p.replace('___MINLAT___',bbox[1]);
+                  p = p.replace('___MAXLON___',bbox[2]);
+                  p = p.replace('___MAXLAT___',bbox[3]);
                   p = p.replace('___ANYTEXT___',Ext.getCmp('anyTextSearchField').getValue() != '' ? Ext.getCmp('anyTextSearchField').getValue() : '*');
                   if (!Ext.getCmp('serviceCheckboxSos').getValue() && !Ext.getCmp('serviceCheckboxWms').getValue() && !Ext.getCmp('serviceCheckboxOpendap').getValue()) {
                     p = p.replace('___SOS___','*');
@@ -761,6 +778,35 @@ function initMap() {
   var mouseControl = new OpenLayers.Control.MousePosition();
   map.addControl(mouseControl);
 
+  var bboxLayer   = new OpenLayers.Layer.Vector('bbox');
+  map.addLayer(bboxLayer);
+  bboxLayer.events.register('sketchstarted',this,function(e) {
+    e.object.removeFeatures(e.object.features);
+  });
+  bboxControl = new OpenLayers.Control.DrawFeature(
+     bboxLayer
+    ,OpenLayers.Handler.RegularPolygon
+    ,{
+      handlerOptions : {
+         sides        : 4
+        ,irregular    : true
+        ,persist      : true
+      }
+    }
+  );
+  map.addControl(bboxControl);
+  bboxControl.events.register('featureadded',this,function(e) {
+    e.object.deactivate();
+  });
+  bboxControl.events.register('activate',this,function(e) {
+    highlightControl.deactivate();
+    selectControl.deactivate();
+  });
+  bboxControl.events.register('deactivate',this,function(e) {
+    highlightControl.activate();
+    selectControl.activate();
+  });
+
   new Ext.ButtonGroup({
      renderTo  : 'mapControlsButtonGroup'
     ,autoWidth : true
@@ -1054,10 +1100,15 @@ function findAndZoomToFeatureById(id) {
 }
 
 function resetAdvancedSearchOptions() {
-  Ext.getCmp('searchMapBoundsRadioGroup').reset();
+  Ext.getCmp('searchBboxRadioGroup').reset();
   Ext.getCmp('searchStartDate').reset();
   Ext.getCmp('searchEndDate').reset();
   Ext.getCmp('serviceCheckboxOpendap').reset();
   Ext.getCmp('serviceCheckboxSos').reset();
   Ext.getCmp('serviceCheckboxWms').reset();
+}
+
+function drawBbox() {
+  bboxControl.layer.removeFeatures(bboxControl.layer.features);
+  bboxControl.activate();
 }
