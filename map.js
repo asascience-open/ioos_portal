@@ -1,7 +1,3 @@
-var cswPost = '<?xml version="1.0"?> <csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" version="2.0.2" service="CSW" resultType="results" outputSchema="http://www.isotc211.org/2005/gmd" startPosition="1" maxRecords="1000"> <csw:Query xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml" typeNames="csw:Record"> <csw:ElementSetName>full</csw:ElementSetName> <csw:Constraint version="1.1.0">     <ogc:Filter>         <ogc:And>             <ogc:And>                 <ogc:PropertyIsGreaterThan>                     <ogc:PropertyName>apiso:modified</ogc:PropertyName>                     <ogc:Literal>___STARTDATE___</ogc:Literal>                 </ogc:PropertyIsGreaterThan>                 <ogc:PropertyIsLessThan>                     <ogc:PropertyName>apiso:modified</ogc:PropertyName>                     <ogc:Literal>___ENDDATE___</ogc:Literal>                 </ogc:PropertyIsLessThan>             </ogc:And>             <ogc:And>                 <ogc:BBOX>                     <ogc:PropertyName>ows:BoundingBox</ogc:PropertyName>                     <gml:Envelope>                         <gml:lowerCorner>___MINLON___ ___MINLAT___</gml:lowerCorner>                         <gml:upperCorner>___MAXLON___ ___MAXLAT___</gml:upperCorner>                     </gml:Envelope>                 </ogc:BBOX>                 <ogc:And>                     <ogc:Or>                         <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">                             <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>                             <ogc:Literal>___OPENDAP___</ogc:Literal>                         </ogc:PropertyIsLike>                         <ogc:Or>                             <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">                                 <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>                                 <ogc:Literal>___SOS___</ogc:Literal>                             </ogc:PropertyIsLike>                             <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">                                 <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>                                 <ogc:Literal>___WMS___</ogc:Literal>                             </ogc:PropertyIsLike>                         </ogc:Or>                     </ogc:Or>                     <ogc:And>                         <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">                             <ogc:PropertyName>AnyText</ogc:PropertyName>                             <ogc:Literal>___ANYTEXT___</ogc:Literal>                         </ogc:PropertyIsLike>                         <ogc:PropertyIsEqualTo>                             <ogc:PropertyName>sys.siteuuid</ogc:PropertyName>                             <ogc:Literal>{E4949969-468A-4B10-823D-9BF1BF0785B2}</ogc:Literal>                         </ogc:PropertyIsEqualTo>                     </ogc:And>                 </ogc:And>             </ogc:And>         </ogc:And>     </ogc:Filter> </csw:Constraint> </csw:Query> </csw:GetRecords>';
-// no dates
-cswPost = '<?xml version="1.0"?> <csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" version="2.0.2" service="CSW" resultType="results" outputSchema="http://www.isotc211.org/2005/gmd" startPosition="1" maxRecords="1000"> <csw:Query xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml" typeNames="csw:Record"> <csw:ElementSetName>full</csw:ElementSetName> <csw:Constraint version="1.1.0">     <ogc:Filter>         <ogc:And>             <ogc:BBOX>                 <ogc:PropertyName>ows:BoundingBox</ogc:PropertyName>                 <gml:Envelope>                     <gml:lowerCorner>___MINLON___ ___MINLAT___</gml:lowerCorner>                     <gml:upperCorner>___MAXLON___ ___MAXLAT___</gml:upperCorner>                 </gml:Envelope>             </ogc:BBOX>             <ogc:And>                 <ogc:Or>                     <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">                         <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>                         <ogc:Literal>___OPENDAP___</ogc:Literal>                     </ogc:PropertyIsLike>                     <ogc:Or>                         <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">                             <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>                             <ogc:Literal>___SOS___</ogc:Literal>                         </ogc:PropertyIsLike>                         <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">                             <ogc:PropertyName>apiso:ServiceType</ogc:PropertyName>                             <ogc:Literal>___WMS___</ogc:Literal>                         </ogc:PropertyIsLike>                     </ogc:Or>                 </ogc:Or>                 <ogc:And>                     <ogc:PropertyIsLike wildCard="*" escape="\" singleChar="?">                         <ogc:PropertyName>AnyText</ogc:PropertyName>                         <ogc:Literal>___ANYTEXT___</ogc:Literal>                     </ogc:PropertyIsLike>                     <ogc:PropertyIsEqualTo>                         <ogc:PropertyName>sys.siteuuid</ogc:PropertyName>                         <ogc:Literal>{E4949969-468A-4B10-823D-9BF1BF0785B2}</ogc:Literal>                     </ogc:PropertyIsEqualTo>                 </ogc:And>             </ogc:And>         </ogc:And>     </ogc:Filter> </csw:Constraint> </csw:Query> </csw:GetRecords>';
-
 var map;
 var defaultBasemap = 'Google Satellite';
 
@@ -166,13 +162,11 @@ function init() {
                 ,new Ext.form.DateField({
                    fieldLabel : 'Show results no older than this date:'
                   ,id         : 'searchStartDate'
-                  ,disabled   : true
                   ,width      : 100
                 })
                 ,new Ext.form.DateField({
                    fieldLabel : 'Show results no newer than this date:'
                   ,id         : 'searchEndDate'
-                  ,disabled   : true
                   ,width      : 100
                 })
                 ,new Ext.form.CheckboxGroup({
@@ -282,38 +276,7 @@ function init() {
                   Ext.getCmp('queryGridPanel').body.applyStyles({
                     'border-top' : '1px solid #99BBE8'
                   });
-                  var p = cswPost;
-                  var d = '1900-01-01';
-                  if (Ext.getCmp('searchStartDate').getValue()) {
-                    d = makeTimeParam(Ext.getCmp('searchStartDate').getValue());
-                  }
-                  p = p.replace('___STARTDATE___',d);
-                  d = '2999-01-01';
-                  if (Ext.getCmp('searchStartDate').getValue()) {
-                    d = makeTimeParam(Ext.getCmp('searchStartDate').getValue());
-                  }
-                  p = p.replace('___ENDDATE___',d);
-                  var bbox = [-9999999,-9999999,9999999,9999999];
-                  if (bboxControl.layer.features.length > 0) {
-                    var f = bboxControl.layer.features[0].clone();
-                    bbox  = f.geometry.getBounds().transform(proj900913,proj4326).toArray();
-                  }
-                  p = p.replace('___MINLON___',bbox[0]);
-                  p = p.replace('___MINLAT___',bbox[1]);
-                  p = p.replace('___MAXLON___',bbox[2]);
-                  p = p.replace('___MAXLAT___',bbox[3]);
-                  p = p.replace('___ANYTEXT___',Ext.getCmp('anyTextSearchField').getValue() != '' ? Ext.getCmp('anyTextSearchField').getValue() : '*');
-                  if (!Ext.getCmp('serviceCheckboxSos').getValue() && !Ext.getCmp('serviceCheckboxWms').getValue() && !Ext.getCmp('serviceCheckboxOpendap').getValue()) {
-                    p = p.replace('___SOS___','*');
-                    p = p.replace('___WMS___','*');
-                    p = p.replace('___OPENDAP___','*');
-                  }
-                  else {
-                    p = p.replace('___SOS___',Ext.getCmp('serviceCheckboxSos').getValue() ? '*sos*' : 'foo');
-                    p = p.replace('___WMS___',Ext.getCmp('serviceCheckboxWms').getValue() ? '*wms*' : 'foo');
-                    p = p.replace('___OPENDAP___',Ext.getCmp('serviceCheckboxOpendap').getValue() ? '*opendap*' : 'foo');
-                  }
-                  sto.setBaseParam('xmlData',p);
+                  sto.setBaseParam('xmlData',buildFilter());
                 }
                 ,load      : function(sto) {
                   var features = [];
@@ -1142,4 +1105,93 @@ function drawBbox() {
 
 function makeTimeParam(d) {
   return d.getUTCFullYear() + '-' + String.leftPad(d.getUTCMonth() + 1,2,'0') + '-' + String.leftPad(d.getUTCDate(),2,'0');
+}
+
+function buildFilter() {
+  var filters = [
+    new OpenLayers.Filter.Comparison({
+       type     : OpenLayers.Filter.Comparison.EQUAL_TO
+      ,property : 'sys.siteuuid'
+      ,value    : '{E4949969-468A-4B10-823D-9BF1BF0785B2}'
+    })
+    ,new OpenLayers.Filter.Comparison({
+       type     : OpenLayers.Filter.Comparison.LIKE
+      ,property : 'AnyText'
+      ,value    : Ext.getCmp('anyTextSearchField').getValue() != '' ? Ext.getCmp('anyTextSearchField').getValue() : '*'
+    })
+  ];
+
+  if (Ext.getCmp('searchStartDate').getValue()) {
+    filters.push(new OpenLayers.Filter.Comparison({
+       type     : OpenLayers.Filter.Comparison.GREATER_THAN_OR_EQUAL_TO
+      ,property : 'startDate'
+      ,value    : makeTimeParam(Ext.getCmp('searchStartDate').getValue())
+    }));
+  }
+
+  if (Ext.getCmp('searchEndDate').getValue()) {
+    filters.push(new OpenLayers.Filter.Comparison({
+       type     : OpenLayers.Filter.Comparison.LESS_THAN_OR_EQUAL_TO
+      ,property : 'endDate'
+      ,value    : makeTimeParam(Ext.getCmp('searchEndDate').getValue())
+    }));
+  }
+
+  if (bboxControl.layer.features.length > 0) {
+    var f = bboxControl.layer.features[0].clone();
+    filters.push(new OpenLayers.Filter.Spatial({
+       type       : OpenLayers.Filter.Spatial.BBOX
+      ,value      : f.geometry.getBounds().transform(proj900913,proj4326)
+      ,property   : 'ows:BoundingBox'
+      ,projection : 'EPSG:4326'
+    }));
+  }
+
+  if (Ext.getCmp('serviceCheckboxSos').getValue() || Ext.getCmp('serviceCheckboxWms').getValue() || Ext.getCmp('serviceCheckboxOpendap').getValue()) {
+    var f = [];
+    if (Ext.getCmp('serviceCheckboxSos').getValue()) {
+      f.push(new OpenLayers.Filter.Comparison({
+         type     : OpenLayers.Filter.Comparison.LIKE
+        ,property : 'apiso:ServiceType'
+        ,value    : '*sos*'
+      }));
+    }
+    if (Ext.getCmp('serviceCheckboxWms').getValue()) {
+      f.push(new OpenLayers.Filter.Comparison({
+         type     : OpenLayers.Filter.Comparison.LIKE
+        ,property : 'apiso:ServiceType'
+        ,value    : '*wms*'
+      }));
+    }
+    if (Ext.getCmp('serviceCheckboxOpendap').getValue()) {
+      f.push(new OpenLayers.Filter.Comparison({
+         type     : OpenLayers.Filter.Comparison.LIKE
+        ,property : 'apiso:ServiceType'
+        ,value    : '*opendap*'
+      }));
+    }
+    if (f.length > 1) {
+      filters.push(new OpenLayers.Filter.Logical({
+          type     : OpenLayers.Filter.Logical.OR
+         ,filters  : f
+      }));
+    }
+    else {
+      filters.push(f[0]);
+    }
+  }
+
+  var filter = new OpenLayers.Filter.Logical({
+     type    : OpenLayers.Filter.Logical.AND
+    ,filters : filters
+  });
+
+  var xml        = new OpenLayers.Format.XML();
+  var filter_1_1 = new OpenLayers.Format.Filter({version: '1.1.0'});
+
+  return [
+     '<?xml version="1.0"?><csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" version="2.0.2" service="CSW" resultType="results" outputSchema="http://www.isotc211.org/2005/gmd" startPosition="1" maxRecords="1000"> <csw:Query xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml" typeNames="csw:Record"> <csw:ElementSetName>full</csw:ElementSetName> <csw:Constraint version="1.1.0">'
+    ,xml.write(filter_1_1.write(filter))
+    ,'</csw:Constraint> </csw:Query> </csw:GetRecords>'
+  ].join('');
 }
