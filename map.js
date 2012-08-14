@@ -85,6 +85,7 @@ function init() {
                   ,id              : 'anyTextSearchField'
                   ,paramName       : 'anyText'
                   ,columnWidth     : 0.80
+                  ,listeners       : {render : function(sf) {sf.triggers[1].hide()}}
                   ,onTrigger1Click : function() {
                     if(this.hasSearch){
                         this.reset();
