@@ -596,10 +596,29 @@ function initMap() {
       })
     ]
     ,displayProjection : proj4326
+    ,controls          : [new OpenLayers.Control.Zoom(),new OpenLayers.Control.Attribution()]
   });
 
   map.events.register('moveend',this,function() {
+    if (navToolbarControl.controls[1].active) {
+      navToolbarControl.controls[1].deactivate();
+      navToolbarControl.draw();
+    }
+
     map.getLayersByName('OpenStreetMapOlay')[0].setVisibility(map.baseLayer.name == 'ESRI Ocean' && map.getZoom() >= 11);
+  });
+
+  var navToolbarControl = new OpenLayers.Control.NavToolbar();
+  map.addControl(navToolbarControl);
+  navToolbarControl.controls[0].disableZoomBox();
+
+  navToolbarControl.controls[1].events.register('activate',this,function(e) {
+    highlightControl.deactivate();
+    selectControl.deactivate();
+  });
+  navToolbarControl.controls[1].events.register('deactivate',this,function(e) {
+    highlightControl.activate();
+    selectControl.activate();
   });
 
   map.setBaseLayer(map.getLayersByName(defaultBasemap)[0]);
