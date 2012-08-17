@@ -602,6 +602,7 @@ function initMap() {
   map.events.register('moveend',this,function() {
     if (navToolbarControl.controls[1].active) {
       navToolbarControl.controls[1].deactivate();
+      navToolbarControl.controls[0].activate();
       navToolbarControl.draw();
     }
 
