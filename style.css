@@ -94,9 +94,16 @@ div.olControlMousePosition {
   margin-bottom : 2px;
 }
 
-#mapControlsButtonGroup {
+#mapControlsResetMap {
   position : absolute;
   right    : 3px;
+  top      : 1px;
+  z-index  : 10000;
+}
+
+#mapControlsChangeBackground {
+  position : absolute;
+  right    : 106px;
   top      : 1px;
   z-index  : 10000;
 }

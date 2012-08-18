@@ -45,7 +45,7 @@ function init() {
            border     : false
           ,autoScroll : true
         }
-        ,html      : '<div id="map"><div id="mapControlsButtonGroup"></div></div</div>'
+        ,html      : '<div id="map"><div id="mapControlsResetMap"></div><div id="mapControlsChangeBackground"></div></div>'
         ,listeners : {
           afterrender : function(p) {
             initMap();
@@ -808,106 +808,102 @@ function initMap() {
     selectControl.activate();
   });
 
-  new Ext.ButtonGroup({
-     renderTo  : 'mapControlsButtonGroup'
-    ,autoWidth : true
-    ,columns   : 3
-    ,title     : 'Map controls'
-    ,items     : [
-      new Ext.Button({
-         text     : '<table><tr><td style="font:11px arial,tahoma,verdana,helvetica;text-align:center">Zoom&nbsp;to<br>all&nbsp;results</td></tr></table>'
-        ,width    : 120
-        ,scale    : 'large'
-        ,icon     : 'img/zoom_extend.png'
-        ,handler  : function() {
-          map.zoomToExtent(map.getLayersByName('queryHits')[0].getDataExtent());
+  new Ext.Button({
+     text     : 'Zoom to results'
+    ,renderTo : 'mapControlsResetMap'
+    ,width    : 100
+    ,height   : 26
+    ,icon     : 'img/zoom_extend16.png'
+    ,tooltip  : 'Reset the map to include all results'
+    ,handler  : function() {
+      map.zoomToExtent(map.getLayersByName('queryHits')[0].getDataExtent());
+    }
+  });
+
+  new Ext.Button({
+     text     : 'Background'
+    ,renderTo : 'mapControlsChangeBackground'
+    ,width    : 100
+    ,height   : 26
+    ,icon     : 'img/map16.png'
+    ,tooltip  : 'Select a different map background'
+    ,menu     : {items : [
+      {
+         text         : 'CloudMade'
+        ,checked      : defaultBasemap == 'CloudMade'
+        ,group        : 'basemap'
+        ,handler      : function() {
+          var lyr = map.getLayersByName('CloudMade')[0];
+          if (lyr.isBaseLayer) {
+            map.setBaseLayer(lyr);
+            lyr.redraw();
+          }
         }
-      })
-      ,{xtype : 'container',autoEl : {tag : 'center'},items : {border : false, html : '<img src="img/blank.png" width=2>'}}
-      ,new Ext.Button({
-         text     : '<table><tr><td style="font:11px arial,tahoma,verdana,helvetica;text-align:center">Change&nbsp;map<br>background</td></tr></table>'
-        ,scale    : 'large'
-        ,width    : 120
-        ,icon     : 'img/map.png'
-        ,menu     : {items : [
-          {
-             text         : 'CloudMade'
-            ,checked      : defaultBasemap == 'CloudMade'
-            ,group        : 'basemap'
-            ,handler      : function() {
-              var lyr = map.getLayersByName('CloudMade')[0];
-              if (lyr.isBaseLayer) {
-                map.setBaseLayer(lyr);
-                lyr.redraw();
-              }
-            }
+      }
+      ,'-'
+      ,{
+         text         : 'ESRI Ocean'
+        ,checked      : defaultBasemap == 'ESRI Ocean'
+        ,group        : 'basemap'
+        ,handler      : function() {
+          var lyr = map.getLayersByName('ESRI Ocean')[0];
+          if (lyr.isBaseLayer) {
+            map.setBaseLayer(lyr);
+            lyr.redraw();
           }
-          ,'-'
-          ,{
-             text         : 'ESRI Ocean'
-            ,checked      : defaultBasemap == 'ESRI Ocean'
-            ,group        : 'basemap'
-            ,handler      : function() {
-              var lyr = map.getLayersByName('ESRI Ocean')[0];
-              if (lyr.isBaseLayer) {
-                map.setBaseLayer(lyr);
-                lyr.redraw();
-              }
-            }
+        }
+      }
+      ,'-'
+      ,{
+         text         : 'Google Hybrid'
+        ,checked      : defaultBasemap == 'Google Hybrid'
+        ,group        : 'basemap'
+        ,handler      : function() {
+          var lyr = map.getLayersByName('Google Hybrid')[0];
+          if (lyr.isBaseLayer) {
+            map.setBaseLayer(lyr);
+            lyr.redraw();
           }
-          ,'-'
-          ,{
-             text         : 'Google Hybrid'
-            ,checked      : defaultBasemap == 'Google Hybrid'
-            ,group        : 'basemap'
-            ,handler      : function() {
-              var lyr = map.getLayersByName('Google Hybrid')[0];
-              if (lyr.isBaseLayer) {
-                map.setBaseLayer(lyr);
-                lyr.redraw();
-              }
-            }
+        }
+      }
+      ,{
+         text         : 'Google Satellite'
+        ,checked      : defaultBasemap == 'Google Satellite'
+        ,group        : 'basemap'
+        ,handler      : function() {
+          var lyr = map.getLayersByName('Google Satellite')[0];
+          if (lyr.isBaseLayer) {
+            map.setBaseLayer(lyr);
+            lyr.redraw();
           }
-          ,{
-             text         : 'Google Satellite'
-            ,checked      : defaultBasemap == 'Google Satellite'
-            ,group        : 'basemap'
-            ,handler      : function() {
-              var lyr = map.getLayersByName('Google Satellite')[0];
-              if (lyr.isBaseLayer) {
-                map.setBaseLayer(lyr);
-                lyr.redraw();
-              }
-            }
+        }
+      }
+      ,{
+         text         : 'Google Terrain'
+        ,checked      : defaultBasemap == 'Google Terrain'
+        ,group        : 'basemap'
+        ,handler      : function() {
+          var lyr = map.getLayersByName('Google Terrain')[0];
+          if (lyr.isBaseLayer) {
+            map.setBaseLayer(lyr);
+            lyr.redraw();
           }
-          ,{
-             text         : 'Google Terrain'
-            ,checked      : defaultBasemap == 'Google Terrain'
-            ,group        : 'basemap'
-            ,handler      : function() {
-              var lyr = map.getLayersByName('Google Terrain')[0];
-              if (lyr.isBaseLayer) {
-                map.setBaseLayer(lyr);
-                lyr.redraw();
-              }
-            }
+        }
+      }
+      ,'-'
+      ,{
+         text         : 'OpenStreetMap'
+        ,checked      : defaultBasemap == 'OpenStreetMap'
+        ,group        : 'basemap'
+        ,handler      : function() {
+          var lyr = map.getLayersByName('OpenStreetMap')[0];
+          if (lyr.isBaseLayer) {
+            map.setBaseLayer(lyr);
+            lyr.redraw();
           }
-          ,'-'
-          ,{
-             text         : 'OpenStreetMap'
-            ,checked      : defaultBasemap == 'OpenStreetMap'
-            ,group        : 'basemap'
-            ,handler      : function() {
-              var lyr = map.getLayersByName('OpenStreetMap')[0];
-              if (lyr.isBaseLayer) {
-                map.setBaseLayer(lyr);
-                lyr.redraw();
-              }
-            }
-          }
-        ]}
-      })
-    ]
+        }
+      }
+    ]}
   });
 
 /*
