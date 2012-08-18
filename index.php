@@ -1,7 +1,7 @@
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="./js/ext-3.3.0/resources/css/ext-all.css"/>
-    <link rel="stylesheet" type="text/css" href="style.css"/>
+    <link rel="stylesheet" type="text/css" href="style.css?0.1"/>
     <!--[if IE]>
       <link rel="stylesheet" type="text/css" href="style.ie.css" />
     <![endif]-->
