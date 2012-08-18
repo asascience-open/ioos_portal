@@ -73,61 +73,45 @@ function init() {
         }
         ,items    : [
           {height : 55,baseHeight : 55,id : 'searchPanel',bodyStyle : 'padding : 6px',items : [
-            {
-               layout : 'column'
-              ,border : false
-              ,defaults : {border : false}
-              ,items : [
-                new Ext.ux.form.SearchField({
-                   emptyText       : 'Enter a search string (* is a wildcard).'
-                  ,border          : false
-                  ,id              : 'anyTextSearchField'
-                  ,paramName       : 'anyText'
-                  ,columnWidth     : 0.80
-                  ,listeners       : {render : function(sf) {sf.triggers[1].hide()}}
-                  ,onTrigger1Click : function() {
-                    if(this.hasSearch){
-                        this.reset();
-                        // having a tough time w/ the focus, so force a reset for emptyText
-                        this.setRawValue(this.emptyText);
-                        this.el.addClass(this.emptyClass);
-                        var o = {start: 0};
-                        if (this.store) {
-                          this.store.baseParams = this.store.baseParams || {};
-                          this.store.baseParams[this.paramName] = '';
-                          this.store.reload({params:o});
-                        }
-                        this.triggers[0].hide();
-                        this.hasSearch = false;
-                    }
-                  }
-                  ,onTrigger2Click : function() {
-                    var v = this.getRawValue();
-                    if(v.length < 1){
-                        this.onTrigger1Click();
-                        return;
-                    }
+            new Ext.ux.form.SearchField({
+               emptyText       : 'Enter a search string (* is a wildcard).'
+              ,width           : 386
+              ,border          : false
+              ,id              : 'anyTextSearchField'
+              ,paramName       : 'anyText'
+              ,onTrigger1Click : function() {
+                if(this.hasSearch){
+                    this.reset();
+                    // having a tough time w/ the focus, so force a reset for emptyText
+                    this.setRawValue(this.emptyText);
+                    this.el.addClass(this.emptyClass);
                     var o = {start: 0};
                     if (this.store) {
                       this.store.baseParams = this.store.baseParams || {};
-                      this.store.baseParams[this.paramName] = v;
+                      this.store.baseParams[this.paramName] = '';
                       this.store.reload({params:o});
                     }
-                    Ext.getCmp('queryGridPanel').getStore().load();
-                    this.hasSearch = true;
-                    this.triggers[0].show();
-                  }
-                })
-                ,{html : '&nbsp;',columnWidth : 0.05}
-                ,new Ext.Button({
-                   columnWidth : 0.15
-                  ,text        : 'Go!'
-                  ,handler     : function() {
-                    Ext.getCmp('queryGridPanel').getStore().load();
-                  }
-                })
-              ]
-            }
+                    this.triggers[0].hide();
+                    this.hasSearch = false;
+                }
+              }
+              ,onTrigger2Click : function() {
+                var v = this.getRawValue();
+                if(v.length < 1){
+                    this.onTrigger1Click();
+                    return;
+                }
+                var o = {start: 0};
+                if (this.store) {
+                  this.store.baseParams = this.store.baseParams || {};
+                  this.store.baseParams[this.paramName] = v;
+                  this.store.reload({params:o});
+                }
+                Ext.getCmp('queryGridPanel').getStore().load();
+                this.hasSearch = true;
+                this.triggers[0].show();
+              }
+            })
             ,{html : '&nbsp;',border : false,height : 4}
             ,new Ext.form.FieldSet({
                title          : '&nbsp;Advanced search options&nbsp;'
@@ -180,15 +164,23 @@ function init() {
                 })
                 ,{html : '<img src="img/blank.png" height=5>',border : false}
                 ,{layout : 'column',border : false,defaults : {border : false},items : [
-                   {html : '&nbsp;',columnWidth : 0.2}
-                  ,new Ext.Button({
-                     columnWidth : 0.6
-                    ,text        : 'Clear advanced search options'
+                   {columnWidth : 0.1,html : '<img src="img/blank.png" height=5>',border : false}
+                   ,new Ext.Button({
+                     columnWidth : 0.3
+                    ,text        : 'Clear options'
                     ,handler     : function() {
                       resetAdvancedSearchOptions();
                     }
                   })
-                  ,{html : '&nbsp;',columnWidth : 0.2}
+                  ,{columnWidth : 0.2,html : '<img src="img/blank.png" height=5>',border : false}
+                  ,new Ext.Button({
+                     columnWidth : 0.3
+                    ,text        : 'Go!'
+                    ,handler     : function() {
+                      Ext.getCmp('queryGridPanel').getStore().load();
+                    }
+                  })
+                  ,{columnWidth : 0.1,html : '<img src="img/blank.png" height=5>',border : false}
                 ]}
               ]
               ,listeners   : {afterrender : function(p) {
