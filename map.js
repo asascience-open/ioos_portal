@@ -1076,30 +1076,37 @@ function opendapGetCaps(node,cb) {
   knownGetCaps[node.attributes.url] = true;
 
   loadDataset(node.attributes.url,function(json) {
-    var nodesByText = {};
-    var nodesText   = [];
-    for (var v in json) {
-      if (!new RegExp(/^(attributes|title)$/).test(v)) {
-        var s = v;
-        if (json[v].attributes && json[v].attributes.long_name) {
-          s = json[v].attributes.long_name + ' (' + v + ')'
+    if (!json) {
+      Ext.Msg.alert('OPeNDAP exception',"I'm sorry, there was a problem accessing this service.");
+      cb([],{status : false});
+      return;
+    }
+    else {
+      var nodesByText = {};
+      var nodesText   = [];
+      for (var v in json) {
+        if (!new RegExp(/^(attributes|title)$/).test(v)) {
+          var s = v;
+          if (json[v].attributes && json[v].attributes.long_name) {
+            s = json[v].attributes.long_name + ' (' + v + ')'
+          }
+          nodesByText[s.toLowerCase()] = {
+             id   : s
+            ,text : s
+            ,qtip : s
+            ,leaf : true
+            ,icon : 'img/layer16.png'
+          };
+          nodesText.push(s.toLowerCase());
         }
-        nodesByText[s.toLowerCase()] = {
-           id   : s
-          ,text : s
-          ,qtip : s
-          ,leaf : true
-          ,icon : 'img/layer16.png'
-        };
-        nodesText.push(s.toLowerCase());
       }
+      nodesText.sort();
+      var nodes = [];
+      for (var i = 0; i < nodesText.length; i++) {
+        nodes.push(nodesByText[nodesText[i]]);
+      }
+      cb(nodes,{status : true});
     }
-    nodesText.sort();
-    var nodes = [];
-    for (var i = 0; i < nodesText.length; i++) {
-      nodes.push(nodesByText[nodesText[i]]);
-    }
-    cb(nodes,{status : true});
   },'get.php');
 }
 

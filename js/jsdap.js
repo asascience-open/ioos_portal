@@ -696,16 +696,26 @@ function loadDataset(url, callback, proxy) {
 
     // Load DDS.
     proxyUrl(url + '.dds', function(dds) {
+      try {
         var dataset = new ddsParser(dds).parse();
-
+      }
+      catch(e) {
+        callback(false);
+      }
         // Load DAS.
+      if (dataset) {
         proxyUrl(url + '.das', function(das) {
+          try {
             dataset = new dasParser(das, dataset).parse();
             callback(dataset);
+          }
+          catch(e) {
+            callback(false);
+          }
         });
+      }
     });
 }
-
 
 function loadData(url, callback, proxy) {
     // User proxy?
