@@ -20,6 +20,7 @@
     <script type="text/javascript" src="./js/jquery/jquery-1.7.1.min.js"></script>
     <script type="text/javascript" src="./js/jquery/jquery.parseSOSGetCap.js"></script>
     <script type="text/javascript" src="./js/jquery/jquery.parseSOSGetObs.js"></script>
+    <script type="text/javascript" src="./js/jsdap.js"></script>
     <script type="text/javascript" src="map.js"></script>
   </body>
 </html>

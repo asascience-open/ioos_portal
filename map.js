@@ -393,7 +393,7 @@ function init() {
                        text : services[i].data.type
                       ,url  : services[i].data.url
                       ,qtip : services[i].data.type + (keywords.length > 0 ? ' keywords: ' + keywords.join(', ') : '')
-                      ,leaf : !new RegExp(/service=(sos|wms)/i).test(services[i].data.url)
+                      ,leaf : !new RegExp(/(service=(sos|wms))|dodsC/i).test(services[i].data.url)
                       ,gpId : rec.id
                     });
                   }
@@ -417,6 +417,9 @@ function init() {
                         }
                         else if (new RegExp(/service=wms/i).test(node.attributes.url)) {
                           wmsGetCaps(node,callback);
+                        }
+                        else if (new RegExp(/dodsC/i).test(node.attributes.url)) {
+                          opendapGetCaps(node,callback);
                         }
                       }
                     })
@@ -963,13 +966,13 @@ function sosGetCaps(node,cb) {
     var nodesByText = {};
     var nodesText   = [];
     for (var i = 0; i < features.length; i++) {
-      nodesByText[features[i].attributes.title] = {
+      nodesByText[features[i].attributes.title.toLowerCase()] = {
          id   : features[i].attributes.id
         ,text : features[i].attributes.title
         ,leaf : true
         ,icon : 'img/zoom16.png'
       };
-      nodesText.push(features[i].attributes.title);
+      nodesText.push(features[i].attributes.title.toLowerCase());
     }
     nodesText.sort();
     var nodes = [];
@@ -1045,14 +1048,14 @@ function wmsGetCaps(node,cb) {
       var nodesByText = {};
       var nodesText   = [];
       for (var i = 0; i < caps.capability.layers.length; i++) {
-        nodesByText[caps.capability.layers[i].title + ' (' + caps.capability.layers[i].name + ')'] = {
+        nodesByText[(caps.capability.layers[i].title + ' (' + caps.capability.layers[i].name + ')').toLowerCase()] = {
            id   : caps.capability.layers[i].name
           ,text : caps.capability.layers[i].title + ' (' + caps.capability.layers[i].name + ')'
           ,qtip : caps.capability.layers[i].title + ' (' + caps.capability.layers[i].name + ')'
           ,leaf : true
           ,icon : 'img/layer16.png'
         };
-        nodesText.push(caps.capability.layers[i].title + ' (' + caps.capability.layers[i].name + ')');
+        nodesText.push(String(caps.capability.layers[i].title + ' (' + caps.capability.layers[i].name + ')').toLowerCase());
       }
       nodesText.sort();
       var nodes = [];
@@ -1062,6 +1065,42 @@ function wmsGetCaps(node,cb) {
       cb(nodes,{status : true});
     }
   });
+}
+
+function opendapGetCaps(node,cb) {
+  if (knownGetCaps[node.attributes.url]) {
+    Ext.Msg.alert('Error','This service has already been added to your map.');
+    cb([],{status : true});
+    return;
+  }
+  knownGetCaps[node.attributes.url] = true;
+
+  loadDataset(node.attributes.url,function(json) {
+    var nodesByText = {};
+    var nodesText   = [];
+    for (var v in json) {
+      if (!new RegExp(/^(attributes|title)$/).test(v)) {
+        var s = v;
+        if (json[v].attributes && json[v].attributes.long_name) {
+          s = json[v].attributes.long_name + ' (' + v + ')'
+        }
+        nodesByText[s.toLowerCase()] = {
+           id   : s
+          ,text : s
+          ,qtip : s
+          ,leaf : true
+          ,icon : 'img/layer16.png'
+        };
+        nodesText.push(s.toLowerCase());
+      }
+    }
+    nodesText.sort();
+    var nodes = [];
+    for (var i = 0; i < nodesText.length; i++) {
+      nodes.push(nodesByText[nodesText[i]]);
+    }
+    cb(nodes,{status : true});
+  },'get.php');
 }
 
 function goQueryGridPanelRowById(gpId,focus) {
