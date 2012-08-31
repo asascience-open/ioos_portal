@@ -331,7 +331,7 @@ function init() {
                   if (sto.getCount() == 1) {
                     countTxt = '1 record fetched.';
                   }
-                  else {
+                  else if (sto.getCount() > 1) {
                     countTxt = sto.getCount() + ' records fetched.';
                   }
                   Ext.getCmp('searchResultsRecordsCounter').setText(countTxt);
@@ -429,10 +429,10 @@ function init() {
                         if (node.leaf) {
                           if (!findAndZoomToFeatureById(node.id)) {
                             if (new RegExp(/^http:\/\//).test(node.attributes.url)) {
-                              Ext.Msg.alert('Unknown service',"I'm sorry, but I don't know how to process this <a target=_blank href='" + node.attributes.url + "'>" + node.attributes.text + "</a> service.");
+                              Ext.Msg.alert('Unknown service',"We're sorry, but we don't know how to process this <a target=_blank href='" + node.attributes.url + "'>" + node.attributes.text + "</a> service.");
                             }
                             else {
-                              Ext.Msg.alert('Unknown service',"I'm sorry, but I don't know how to process this " + node.attributes.text + " service.");
+                              Ext.Msg.alert('Unknown service',"We're sorry, but we don't know how to process this " + node.attributes.text + " service.");
                             }
                           }
                         }
@@ -451,22 +451,6 @@ function init() {
                           }
                         }
                         Ext.defer(function(){lyr.events.triggerEvent('featuresmodified',{features : f})},100);
-                        lyr.redraw();
-                      }
-                      ,beforecollapsenode : function(node) {
-                        var n = {};
-                        for (var i = 0; i < node.childNodes.length; i++) {
-                          n[node.childNodes[i].id] = true;
-                        }
-                        var lyr = map.getLayersByName('queryHits')[0];
-                        var f   = [];
-                        for (var i = 0; i < lyr.features.length; i++) {
-                          if (n[lyr.features[i].attributes.id]) {
-                            lyr.features[i].attributes.hidden = true;
-                            f.push(lyr.features[i]);
-                          }
-                        }
-                        lyr.events.triggerEvent('featuresmodified',{features : f});
                         lyr.redraw();
                       }
                     }
@@ -941,10 +925,10 @@ function sosGetCaps(node,cb) {
   }
   knownGetCaps[node.attributes.url] = true;
 
-  function goFeatures(sos) {
+  function goFeatures(offerings) {
     var features = [];
-    for (var i = 0; i < sos.offerings.length; i++) {
-      var properties = getProperties({offering : sos.offerings[i]});
+    for (var i = 0; i < offerings.length; i++) {
+      var properties = getProperties({offering : offerings[i]});
       var props = [];
       for (var p in properties) {
         var s = p.split(/#|\//).pop();
@@ -952,12 +936,12 @@ function sosGetCaps(node,cb) {
         props.push(s);
       }
       props.sort();
-      var f = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(sos.offerings[i].llon,sos.offerings[i].llat).transform(proj4326,proj900913));
+      var f = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(offerings[i].llon,offerings[i].llat).transform(proj4326,proj900913));
       f.attributes = {
          id         : Ext.id()
-        ,title      : sos.offerings[i].shortName
+        ,title      : offerings[i].shortName
         ,summary    : props.join('<br>')
-        ,offering   : sos.offerings[i]
+        ,offering   : offerings[i]
         ,properties : props
       };
       features.push(f);
@@ -995,10 +979,25 @@ function sosGetCaps(node,cb) {
         Ext.Msg.alert('SOS exception',sos.exception_error);
         return;
       }
-      if (sos.offerings.length > 250) {
-        Ext.MessageBox.confirm('Warning','This service has returned ' + sos.offerings.length + ' features which may slow your browser.  Are you sure you wish to continue?  If you answer no, you will not be able to display this service until you start the query process over.',function(but) {
+
+      // only pass along offerings that are outside the area of interest (if any)
+      var offerings = [];
+      if (bboxControl.layer.features.length > 0) {
+        var aoi = bboxControl.layer.features[0].geometry.getBounds();
+        for (var i = 0; i < sos.offerings.length; i++) {
+          if (aoi.containsBounds(new OpenLayers.Geometry.Point(sos.offerings[i].llon,sos.offerings[i].llat).transform(proj4326,proj900913).getBounds())) {
+            offerings.push(sos.offerings[i]);
+          }
+        }
+      }
+      else {
+        offerings = sos.offerings;
+      }
+
+      if (offerings.length > 250) {
+        Ext.MessageBox.confirm('Warning','This service has returned ' + offerings.length + ' features which may slow your browser.  Are you sure you wish to continue?  If you answer no, you will not be able to display this service until you start the query process over.',function(but) {
           if (but == 'yes') {
-            goFeatures(sos);
+            goFeatures(offerings);
           }
           else {
             cb([],{status : false});
@@ -1010,7 +1009,7 @@ function sosGetCaps(node,cb) {
         });
       }
       else {
-        goFeatures(sos);
+        goFeatures(offerings);
       }
     }
   });
@@ -1077,7 +1076,7 @@ function opendapGetCaps(node,cb) {
 
   loadDataset(node.attributes.url,function(json) {
     if (!json) {
-      Ext.Msg.alert('OPeNDAP exception',"I'm sorry, there was a problem accessing this service.");
+      Ext.Msg.alert('OPeNDAP exception',"We're sorry, there was a problem accessing this service.");
       cb([],{status : false});
       return;
     }
