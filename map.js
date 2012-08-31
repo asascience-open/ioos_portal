@@ -310,19 +310,7 @@ function init() {
                   });
                   var lyr = map.getLayersByName('queryHits')[0];
                   lyr.addFeatures(features);
-                  if (sto.getCount() > 0) {
-                    if (bboxControl.layer.features.length > 0) {
-                      Ext.MessageBox.confirm('Warning','Since you have created custom boundaries, would you like to allow the map to reset the zoom to include the full boundaries of the data results (which may be larger than your custom boundaries)?',function(but) {
-                        if (but == 'yes') {
-                          map.zoomToExtent(lyr.getDataExtent());
-                        }
-                      });
-                    }
-                    else {
-                      map.zoomToExtent(lyr.getDataExtent());
-                    }
-                  }
-                  else {
+                  if (sto.getCount() < 0) {
                     Ext.getCmp('queryGridPanel').body.applyStyles({
                       'border-top' : 'none'
                     });
@@ -994,30 +982,7 @@ function sosGetCaps(node,cb) {
         offerings = sos.offerings;
       }
 
-      if (offerings.length < sos.offerings.length || offerings.length > 250) {
-        var txt = [];
-        if (offerings.length < sos.offerings.length) {
-          txt.push('You will be viewing ' + offerings.length + ' out of a possible ' + sos.offerings.length + ' features. If you wish to view the additional results, redraw your boundaries or remove them. Then rerun your query.');
-        }
-        if (offerings.length > 250) {
-          txt.push('This service has returned over 250 features which may slow your browser.');
-        }
-        Ext.MessageBox.confirm('Results notice',txt.join('<br>') + ' Do you wish to continue? If you answer no, you will not be able to display this service until you start the query process over.',function(but) {
-          if (but == 'yes') {
-            goFeatures(offerings);
-          }
-          else {
-            cb([],{status : false});
-            var gp = Ext.getCmp('activeFeaturesGridPanel');
-            if (gp) {
-              gp.getStore().fireEvent('load');
-            }
-          }
-        });
-      }
-      else {
-        goFeatures(offerings);
-      }
+      goFeatures(offerings);
     }
   });
 }
