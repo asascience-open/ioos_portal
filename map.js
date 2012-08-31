@@ -1046,15 +1046,29 @@ function wmsGetCaps(node,cb) {
       }
       var nodesByText = {};
       var nodesText   = [];
+      var aoi;
+      if (bboxControl.layer.features.length > 0) {
+        aoi = bboxControl.layer.features[0].geometry.getBounds();
+      }
       for (var i = 0; i < caps.capability.layers.length; i++) {
-        nodesByText[(caps.capability.layers[i].title + ' (' + caps.capability.layers[i].name + ')').toLowerCase()] = {
-           id   : caps.capability.layers[i].name
-          ,text : caps.capability.layers[i].title + ' (' + caps.capability.layers[i].name + ')'
-          ,qtip : caps.capability.layers[i].title + ' (' + caps.capability.layers[i].name + ')'
-          ,leaf : true
-          ,icon : 'img/layer16.png'
-        };
-        nodesText.push(String(caps.capability.layers[i].title + ' (' + caps.capability.layers[i].name + ')').toLowerCase());
+        var bboxOk = true;
+        if (
+          aoi
+          && caps.capability.layers[i].llbbox
+          && !aoi.intersectsBounds(new OpenLayers.Bounds(caps.capability.layers[i].llbbox[0],caps.capability.layers[i].llbbox[1],caps.capability.layers[i].llbbox[2],caps.capability.layers[i].llbbox[3]).transform(proj4326,proj900913))
+        ) {
+          bboxOk = false;
+        }
+        if (bboxOk) {
+          nodesByText[(caps.capability.layers[i].title + ' (' + caps.capability.layers[i].name + ')').toLowerCase()] = {
+             id   : caps.capability.layers[i].name
+            ,text : caps.capability.layers[i].title + ' (' + caps.capability.layers[i].name + ')'
+            ,qtip : caps.capability.layers[i].title + ' (' + caps.capability.layers[i].name + ')'
+            ,leaf : true
+            ,icon : 'img/layer16.png'
+          };
+          nodesText.push(String(caps.capability.layers[i].title + ' (' + caps.capability.layers[i].name + ')').toLowerCase());
+        }
       }
       nodesText.sort();
       var nodes = [];
