@@ -238,9 +238,24 @@ function init() {
                     return new Ext.data.XmlReader({
                        record : 'gmd_identificationInfo > srv_SV_ServiceIdentification'
                       ,fields : [
-                         {name : 'type'    ,mapping : 'srv_serviceType > gco_LocalName'}
-                        ,{name : 'url'     ,mapping : 'srv_containsOperations > srv_SV_OperationMetadata > srv_connectPoint > gmd_CI_OnlineResource > gmd_linkage > gmd_URL'}
-                        ,{name : 'keywords',convert : (function(){
+                         {name : 'type'     ,mapping : 'srv_serviceType > gco_LocalName'}
+                        ,{name : 'url'      ,mapping : 'srv_containsOperations > srv_SV_OperationMetadata > srv_connectPoint > gmd_CI_OnlineResource > gmd_linkage > gmd_URL'}
+                        ,{name : 'title'    ,mapping : 'gmd_citation > gmd_CI_Citation > gmd_title > gco_CharacterString'}
+                        ,{name : 'summary'  ,mapping : 'gmd_abstract > gco_CharacterString'}
+                        ,{name : 'extents'  ,convert : (function(){
+                          return function(v,n) {
+                            return new Ext.data.XmlReader({
+                               record : 'srv_extent'
+                              ,fields : [
+                                 {name : 'bboxWest' ,mapping : 'gmd_EX_Extent > gmd_geographicElement > gmd_EX_GeographicBoundingBox > gmd_westBoundLongitude > gco_Decimal'}
+                                ,{name : 'bboxEast' ,mapping : 'gmd_EX_Extent > gmd_geographicElement > gmd_EX_GeographicBoundingBox > gmd_eastBoundLongitude > gco_Decimal'}
+                                ,{name : 'bboxSouth',mapping : 'gmd_EX_Extent > gmd_geographicElement > gmd_EX_GeographicBoundingBox > gmd_southBoundLatitude > gco_Decimal'}
+                                ,{name : 'bboxNorth',mapping : 'gmd_EX_Extent > gmd_geographicElement > gmd_EX_GeographicBoundingBox > gmd_northBoundLatitude > gco_Decimal'}
+                              ]
+                            }).readRecords(n).records;
+                          }
+                        })()}
+                        ,{name : 'keywords' ,convert : (function(){
                           return function(v,n) {
                             return new Ext.data.XmlReader({
                                record : 'srv_keywords > gmd_MD_Keywords > gmd_keyword'
@@ -273,6 +288,40 @@ function init() {
                 ,load      : function(sto) {
                   var features = [];
                   sto.each(function(rec) {
+                    var services = rec.get('services');
+                    if (!rec.get('title')) {
+                      for (var i = 0; i < services.length; i++) {
+                        if (services[i].data.title) {
+                          rec.set('title',services[i].data.title);
+                          rec.commit();
+                        }
+                      }
+                    }
+                    if (!rec.get('summary')) {
+                      for (var i = 0; i < services.length; i++) {
+                        if (services[i].data.summary) {
+                          rec.set('summary',services[i].data.summary);
+                          rec.commit();
+                        }
+                      }
+                    }
+                    if (!rec.get('bboxWest') && !rec.get('bboxEast') && !rec.get('bboxNorth') && !rec.get('bboxSouth')) {
+                      var bounds = new OpenLayers.Bounds();
+                      for (var i = 0; i < services.length; i++) {
+                        var bbox = services[i].data.extents;
+                        for (var j = 0; j < bbox.length; j++) {
+                          bounds.extend(new OpenLayers.LonLat(services[i].data.extents[j].data.bboxWest,services[i].data.extents[j].data.bboxSouth));
+                          bounds.extend(new OpenLayers.LonLat(services[i].data.extents[j].data.bboxEast,services[i].data.extents[j].data.bboxNorth));
+                        }
+                      }
+                      var bounds = bounds.toBBOX().split(',');
+                      rec.set('bboxWest',bounds[0]);
+                      rec.set('bboxSouth',bounds[1]);
+                      rec.set('bboxEast',bounds[2]);
+                      rec.set('bboxNorth',bounds[3]);
+                      rec.commit();
+                    }
+
                     var g = {
                        type        : 'Polygon'
                       ,coordinates : [[
