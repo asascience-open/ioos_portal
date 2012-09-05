@@ -356,6 +356,87 @@ function init() {
                       f[0].geometry = new OpenLayers.Geometry.LineString(vertices);
                     }
                     features.push(f[0]);
+                    
+                    new Ext.ToolTip({
+                       html   : 'Zoom to ' + rec.get('title')
+                      ,target : rec.id + 'toolTip'
+                    });
+                    var children = [];
+                    var services = rec.get('services');
+                    for (var i = 0; i < services.length; i++) {
+                      var keywords = [];
+                      for (var j = 0; j < services[i].data.keywords.length; j++) {
+                        if (services[i].data.keywords[j].data.keyword != '') {
+                          keywords.push(services[i].data.keywords[j].data.keyword);
+                        }
+                      }
+                      keywords.sort();
+                      children.push({
+                         text : services[i].data.type
+                        ,url  : services[i].data.url
+                        ,qtip : services[i].data.type + (keywords.length > 0 ? ' keywords: ' + keywords.join(', ') : '')
+                        ,leaf : !new RegExp(/(service=(sos|wms))|dodsC/i).test(services[i].data.url)
+                        ,gpId : rec.id
+                      });
+                    }
+                    var tp = new Ext.tree.TreePanel({
+                       renderTo    : rec.id
+                      ,id          : rec.id + 'treePanel'
+                      ,width       : Ext.getCmp('queryGridPanel').getWidth() - 35
+                      ,border      : false
+                      ,rootVisible : false
+                      ,root        : new Ext.tree.AsyncTreeNode({children : [{
+                         text      : 'Services'
+                        ,children  : children
+                        ,qtip      : 'Expand to view available data services'
+                      }]})
+                      ,bodyStyle   : 'background-color:transparent'
+                      ,loader      : new Ext.tree.TreeLoader({
+                        directFn : function(nodeId,callback) {
+                          var node = tp.getNodeById(nodeId);
+                          if (new RegExp(/service=sos/i).test(node.attributes.url)) {
+                            sosGetCaps(node,callback);
+                          }
+                          else if (new RegExp(/service=wms/i).test(node.attributes.url)) {
+                            wmsGetCaps(node,callback);
+                          }
+                          else if (new RegExp(/dodsC/i).test(node.attributes.url)) {
+                            opendapGetCaps(node,callback);
+                          }
+                        }
+                      })
+                      ,listeners   : {
+                        click : function(node,e) {
+                          goQueryGridPanelRowById(node.attributes.gpId ? node.attributes.gpId : node.parentNode.attributes.gpId,false);
+                          if (node.leaf) {
+                            if (!findAndZoomToFeatureById(node.id)) {
+                              if (new RegExp(/^http:\/\//).test(node.attributes.url)) {
+                                Ext.Msg.alert('Unknown service',"We're sorry, but we don't know how to process this <a target=_blank href='" + node.attributes.url + "'>" + node.attributes.text + "</a> service.");
+                              }
+                              else {
+                                Ext.Msg.alert('Unknown service',"We're sorry, but we don't know how to process this " + node.attributes.text + " service.");
+                              }
+                            }
+                          }
+                        }
+                        ,beforeexpandnode : function(node) {
+                          var n = {};
+                          for (var i = 0; i < node.childNodes.length; i++) {
+                            n[node.childNodes[i].id] = true;
+                          }
+                          var lyr = map.getLayersByName('queryHits')[0];
+                          var f   = [];
+                          for (var i = 0; i < lyr.features.length; i++) {
+                            if (n[lyr.features[i].attributes.id]) {
+                              lyr.features[i].attributes.hidden = false;
+                              f.push(lyr.features[i]);
+                            }
+                          }
+                          Ext.defer(function(){lyr.events.triggerEvent('featuresmodified',{features : f})},100);
+                          lyr.redraw();
+                        }
+                      }
+                    });
                   });
                   var lyr = map.getLayersByName('queryHits')[0];
                   lyr.addFeatures(features);
@@ -410,89 +491,6 @@ function init() {
               ,listeners     : {refresh : function(view) {
                 knownGetCaps = {};
                 Ext.getCmp('queryGridPanel').getSelectionModel().clearSelections();
-                var sto = view.grid.getStore();
-                sto.each(function(rec) {
-                  new Ext.ToolTip({
-                     html   : 'Zoom to ' + rec.get('title')
-                    ,target : rec.id + 'toolTip'
-                  });
-                  var children = [];
-                  var services = rec.get('services');
-                  for (var i = 0; i < services.length; i++) {
-                    var keywords = [];
-                    for (var j = 0; j < services[i].data.keywords.length; j++) {
-                      if (services[i].data.keywords[j].data.keyword != '') {
-                        keywords.push(services[i].data.keywords[j].data.keyword);
-                      }
-                    }
-                    keywords.sort();
-                    children.push({
-                       text : services[i].data.type
-                      ,url  : services[i].data.url
-                      ,qtip : services[i].data.type + (keywords.length > 0 ? ' keywords: ' + keywords.join(', ') : '')
-                      ,leaf : !new RegExp(/(service=(sos|wms))|dodsC/i).test(services[i].data.url)
-                      ,gpId : rec.id
-                    });
-                  }
-                  var tp = new Ext.tree.TreePanel({
-                     renderTo    : rec.id
-                    ,id          : rec.id + 'treePanel'
-                    ,width       : Ext.getCmp('queryGridPanel').getWidth() - 35
-                    ,border      : false
-                    ,rootVisible : false
-                    ,root        : new Ext.tree.AsyncTreeNode({children : [{
-                       text      : 'Services'
-                      ,children  : children
-                      ,qtip      : 'Expand to view available data services'
-                    }]})
-                    ,bodyStyle   : 'background-color:transparent'
-                    ,loader      : new Ext.tree.TreeLoader({
-                      directFn : function(nodeId,callback) {
-                        var node = tp.getNodeById(nodeId);
-                        if (new RegExp(/service=sos/i).test(node.attributes.url)) {
-                          sosGetCaps(node,callback);
-                        }
-                        else if (new RegExp(/service=wms/i).test(node.attributes.url)) {
-                          wmsGetCaps(node,callback);
-                        }
-                        else if (new RegExp(/dodsC/i).test(node.attributes.url)) {
-                          opendapGetCaps(node,callback);
-                        }
-                      }
-                    })
-                    ,listeners   : {
-                      click : function(node,e) {
-                        goQueryGridPanelRowById(node.attributes.gpId ? node.attributes.gpId : node.parentNode.attributes.gpId,false);
-                        if (node.leaf) {
-                          if (!findAndZoomToFeatureById(node.id)) {
-                            if (new RegExp(/^http:\/\//).test(node.attributes.url)) {
-                              Ext.Msg.alert('Unknown service',"We're sorry, but we don't know how to process this <a target=_blank href='" + node.attributes.url + "'>" + node.attributes.text + "</a> service.");
-                            }
-                            else {
-                              Ext.Msg.alert('Unknown service',"We're sorry, but we don't know how to process this " + node.attributes.text + " service.");
-                            }
-                          }
-                        }
-                      }
-                      ,beforeexpandnode : function(node) {
-                        var n = {};
-                        for (var i = 0; i < node.childNodes.length; i++) {
-                          n[node.childNodes[i].id] = true;
-                        }
-                        var lyr = map.getLayersByName('queryHits')[0];
-                        var f   = [];
-                        for (var i = 0; i < lyr.features.length; i++) {
-                          if (n[lyr.features[i].attributes.id]) {
-                            lyr.features[i].attributes.hidden = false;
-                            f.push(lyr.features[i]);
-                          }
-                        }
-                        Ext.defer(function(){lyr.events.triggerEvent('featuresmodified',{features : f})},100);
-                        lyr.redraw();
-                      }
-                    }
-                  });
-                });
               }}
             }
             ,hideHeaders      : true
