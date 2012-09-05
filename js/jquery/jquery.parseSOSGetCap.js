@@ -214,7 +214,8 @@ SOSCapabilities.prototype.parseGetCap = function(xml, namespace)
 
 		var gml_id = off_node.attr('gml:id');
 		//  HERE for now we are skipping any  "all" offerings
-		if(gml_id.match(/all/i)){
+                //  cgalvarino added 1st check for gml_id
+		if(!gml_id || gml_id.match(/all/i)){
 			return true;
 		}
 		OfferingObj.gml_id = gml_id;

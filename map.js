@@ -1012,6 +1012,7 @@ function sosGetCaps(node,cb) {
       var sos = new SOSCapabilities(new OpenLayers.Format.XML().read(r.responseText));
       if (sos.type === 'EXCEPTION') {
         Ext.Msg.alert('SOS exception',sos.exception_error);
+        cb([],{status : true});
         return;
       }
 
