@@ -286,7 +286,6 @@ function init() {
                   sto.setBaseParam('xmlData',buildFilter());
                 }
                 ,load      : function(sto) {
-                  var features = [];
                   sto.each(function(rec) {
                     var services = rec.get('services');
                     if (!rec.get('title')) {
@@ -321,7 +320,12 @@ function init() {
                       rec.set('bboxNorth',bounds[3]);
                       rec.commit();
                     }
+                  });
 
+                  sto.sort('title','ASC');
+
+                  var features = [];
+                  sto.each(function(rec) {
                     var g = {
                        type        : 'Polygon'
                       ,coordinates : [[
