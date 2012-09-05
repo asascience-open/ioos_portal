@@ -957,29 +957,31 @@ function getOpenLayersElement(e) {
 }
 
 function sosGetCaps(node,cb) {
-  if (knownGetCaps[node.attributes.url]) {
+  if (knownGetCaps[node.attributes.gpId + node.attributes.url]) {
     Ext.Msg.alert('Error','This service has already been added to your map.');
     cb([],{status : true});
     return;
   }
-  knownGetCaps[node.attributes.url] = true;
+  knownGetCaps[node.attributes.gpId + node.attributes.url] = true;
 
   function goFeatures(offerings) {
     var features = [];
     for (var i = 0; i < offerings.length; i++) {
       var properties = getProperties({offering : offerings[i]});
-      var props = [];
+      var props      = [];
+      var propsShort = [];
       for (var p in properties) {
         var s = p.split(/#|\//).pop();
-        s = s.substr(0,40) + (s.length > 40 ? '...' : '');
         props.push(s);
+        propsShort.push(s.substr(0,40) + (s.length > 40 ? '...' : ''));
+        
       }
       props.sort();
       var f = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(offerings[i].llon,offerings[i].llat).transform(proj4326,proj900913));
       f.attributes = {
          id         : Ext.id()
         ,title      : offerings[i].shortName
-        ,summary    : props.join('<br>')
+        ,summary    : propsShort.join('<br>')
         ,offering   : offerings[i]
         ,properties : props
       };
@@ -1052,12 +1054,12 @@ function getProperties(attr) {
 }
 
 function wmsGetCaps(node,cb) {
-  if (knownGetCaps[node.attributes.url]) {
+  if (knownGetCaps[node.attributes.gpId + node.attributes.url]) {
     Ext.Msg.alert('Error','This service has already been added to your map.');
     cb([],{status : true});
     return;
   }
-  knownGetCaps[node.attributes.url] = true;
+  knownGetCaps[node.attributes.gpId + node.attributes.url] = true;
 
   OpenLayers.Request.issue({
      url      : 'get.php?url=' + encodeURIComponent(node.attributes.url)
@@ -1105,12 +1107,12 @@ function wmsGetCaps(node,cb) {
 }
 
 function opendapGetCaps(node,cb) {
-  if (knownGetCaps[node.attributes.url]) {
+  if (knownGetCaps[node.attributes.gpId + node.attributes.url]) {
     Ext.Msg.alert('Error','This service has already been added to your map.');
     cb([],{status : true});
     return;
   }
-  knownGetCaps[node.attributes.url] = true;
+  knownGetCaps[node.attributes.gpId + node.attributes.url] = true;
 
   loadDataset(node.attributes.url,function(json) {
     if (!json) {
